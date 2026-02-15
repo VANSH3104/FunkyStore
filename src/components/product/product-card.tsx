@@ -7,6 +7,10 @@ import { motion } from "framer-motion"
 import { ShoppingBag, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { api } from "@/trpc/react"
+import { useSession } from "next-auth/react"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 interface ProductCardProps {
     product: {
@@ -22,6 +26,49 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
+    const { data: session } = useSession()
+    const { toast } = useToast()
+    const router = useRouter()
+    const utils = api.useUtils()
+
+    const { data: wishlist } = api.account.getWishlist.useQuery(undefined, {
+        enabled: !!session,
+    })
+
+    const isInWishlist = wishlist?.some((item) => item.productId === product.id)
+
+    const { mutate: toggleWishlist, isPending: isToggling } = api.account.toggleWishlist.useMutation({
+        onSuccess: (data) => {
+            void utils.account.getWishlist.invalidate()
+            toast({
+                title: data.added ? "Added to Wishlist" : "Removed from Wishlist",
+                description: `${product.name} has been ${data.added ? "added to" : "removed from"} your archive.`,
+                className: "bg-black border-2 border-neon-green text-white font-black uppercase rounded-none",
+            })
+        },
+        onError: (err) => {
+            toast({
+                title: "Error",
+                description: err.message || "Failed to update wishlist. Access denied.",
+                variant: "destructive",
+                className: "bg-black border-2 border-electric-pink text-white font-black uppercase rounded-none",
+            })
+        }
+    })
+
+    const handleToggleWishlist = () => {
+        if (!session) {
+            toast({
+                title: "Authentication Required",
+                description: "Log in to sync this gear to your archive.",
+                className: "bg-black border-2 border-electric-pink text-white font-black uppercase rounded-none",
+            })
+            router.push("/api/auth/signin")
+            return
+        }
+        toggleWishlist({ productId: product.id })
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -45,8 +92,19 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
                 {/* Actions Overlay */}
                 <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                    <Button size="icon" className="bg-white text-black hover:bg-neon-green rounded-none">
-                        <Heart className="w-5 h-5" />
+                    <Button
+                        size="icon"
+                        className={cn(
+                            "bg-white text-black hover:bg-neon-green rounded-none transition-colors",
+                            isInWishlist && "bg-neon-green text-black"
+                        )}
+                        onClick={(e) => {
+                            e.preventDefault()
+                            handleToggleWishlist()
+                        }}
+                        disabled={isToggling}
+                    >
+                        <Heart className={cn("w-5 h-5", isInWishlist && "fill-black")} />
                     </Button>
                     <Button size="icon" className="bg-white text-black hover:bg-neon-green rounded-none">
                         <ShoppingBag className="w-5 h-5" />

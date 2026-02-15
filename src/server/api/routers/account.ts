@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc"
 import { TRPCError } from "@trpc/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/server/auth"
@@ -38,12 +38,9 @@ export const accountRouter = createTRPCRouter({
         })
     }),
 
-    getWishlist: publicProcedure.query(async ({ ctx }) => {
-        const session = await getServerSession(authOptions)
-        if (!session?.user) throw new TRPCError({ code: "UNAUTHORIZED" })
-
+    getWishlist: protectedProcedure.query(async ({ ctx }) => {
         return ctx.db.wishlistItem.findMany({
-            where: { userId: session.user.id },
+            where: { userId: ctx.session.user.id },
             include: {
                 product: {
                     include: {
@@ -54,16 +51,15 @@ export const accountRouter = createTRPCRouter({
         })
     }),
 
-    toggleWishlist: publicProcedure
+    toggleWishlist: protectedProcedure
         .input(z.object({ productId: z.string() }))
         .mutation(async ({ ctx, input }) => {
-            const session = await getServerSession(authOptions)
-            if (!session?.user) throw new TRPCError({ code: "UNAUTHORIZED" })
+            const userId = ctx.session.user.id;
 
             const existing = await ctx.db.wishlistItem.findUnique({
                 where: {
                     userId_productId: {
-                        userId: session.user.id,
+                        userId: userId,
                         productId: input.productId,
                     }
                 }
@@ -77,7 +73,7 @@ export const accountRouter = createTRPCRouter({
             } else {
                 await ctx.db.wishlistItem.create({
                     data: {
-                        userId: session.user.id,
+                        userId: userId,
                         productId: input.productId,
                     }
                 })

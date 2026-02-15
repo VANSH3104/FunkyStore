@@ -7,9 +7,13 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ShoppingBag, Heart, ChevronRight, Star, Share2, ShieldCheck, Truck, RefreshCcw, Tag } from "lucide-react"
+import { ShoppingBag, Heart, ChevronRight, Star, Share2, ShieldCheck, Truck, RefreshCcw, Tag, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/store/use-cart"
+import { SimilarProducts } from "@/components/product/similar-products"
+import { useSession } from "next-auth/react"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
 
 export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = React.use(params)
@@ -18,7 +22,53 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     })
 
     const { addItem } = useCart()
+    const { data: session } = useSession()
+    const { toast } = useToast()
+    const router = useRouter()
+    const utils = api.useUtils()
+
     const [selectedOptions, setSelectedOptions] = React.useState<Record<string, string>>({})
+    const [activeImageIndex, setActiveImageIndex] = React.useState<number | null>(null)
+
+    const { data: wishlist } = api.account.getWishlist.useQuery(undefined, {
+        enabled: !!session,
+    })
+
+    const isInWishlist = wishlist?.some((item) => item.productId === product?.id)
+
+    const { mutate: toggleWishlist, isPending: isToggling } = api.account.toggleWishlist.useMutation({
+        onSuccess: (data) => {
+            void utils.account.getWishlist.invalidate()
+            toast({
+                title: data.added ? "Added to Wishlist" : "Removed from Wishlist",
+                description: `${product?.name} has been ${data.added ? "added to" : "removed from"} your archive.`,
+                className: "bg-black border-2 border-neon-green text-white font-black uppercase rounded-none",
+            })
+        },
+        onError: (err) => {
+            toast({
+                title: "Error",
+                description: err.message || "Failed to update wishlist. Access denied.",
+                variant: "destructive",
+                className: "bg-black border-2 border-electric-pink text-white font-black uppercase rounded-none",
+            })
+        }
+    })
+
+    const handleToggleWishlist = () => {
+        if (!session) {
+            toast({
+                title: "Authentication Required",
+                description: "Log in to sync this gear to your archive.",
+                className: "bg-black border-2 border-electric-pink text-white font-black uppercase rounded-none",
+            })
+            router.push("/api/auth/signin")
+            return
+        }
+        if (product) {
+            toggleWishlist({ productId: product.id })
+        }
+    }
 
     if (isLoading) return <PDPLoading />
     if (!product) return notFound()
@@ -51,98 +101,140 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     const discount = originalPrice ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100) : 0
 
     return (
-        <div className="min-h-screen bg-white text-black">
+        <div className="min-h-screen bg-black text-white selection:bg-neon-green selection:text-black">
+            {/* Image Lightbox / Fullscreen View */}
+            {activeImageIndex !== null && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-12"
+                    onClick={() => setActiveImageIndex(null)}
+                >
+                    <div className="relative w-full h-full max-w-5xl">
+                        <Image
+                            src={product.images[activeImageIndex]?.url || ""}
+                            alt={product.name}
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                        <button
+                            className="absolute top-0 right-0 p-4 text-white hover:text-neon-green transition-colors font-black text-xl uppercase tracking-widest"
+                            onClick={() => setActiveImageIndex(null)}
+                        >
+                            [ Close ]
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+
             {/* Breadcrumbs */}
-            <div className="border-b border-gray-100">
-                <nav className="container mx-auto px-4 py-4 flex items-center gap-2 text-[11px] font-medium text-gray-500 uppercase tracking-tight">
-                    <Link href="/" className="hover:text-black transition-colors">Home</Link>
+            <div className="border-b border-white/5">
+                <nav className="container mx-auto px-4 py-4 flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                    <Link href="/" className="hover:text-neon-green transition-colors">Home</Link>
                     <ChevronRight className="w-3 h-3" />
-                    <Link href="/products" className="hover:text-black transition-colors">Catalog</Link>
+                    <Link href="/products" className="hover:text-neon-green transition-colors">Catalog</Link>
                     <ChevronRight className="w-3 h-3" />
-                    <span className="text-black font-semibold truncate max-w-[200px]">{product.name}</span>
+                    <span className="text-white truncate max-w-[150px] md:max-w-none">{product.name}</span>
                 </nav>
             </div>
 
-            <div className="container mx-auto px-4 py-8 md:py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-16">
+            <div className="container mx-auto px-4 py-8 md:py-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-20">
 
-                    {/* LEFT COLUMN: MULTI-IMAGE GRID (MYNTRA STYLE) */}
-                    <div className="lg:col-span-7 xl:col-span-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* LEFT COLUMN: MULTI-IMAGE GRID */}
+                    <div className="lg:col-span-12 xl:col-span-8">
+                        <div className={cn(
+                            "grid gap-6",
+                            product.images.length === 1 ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
+                        )}>
                             {product.images.map((img, idx) => (
                                 <motion.div
                                     key={img.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.1 }}
-                                    className="relative aspect-[3/4] overflow-hidden group border border-gray-100 bg-gray-50"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: idx * 0.1, duration: 0.8, ease: "easeOut" }}
+                                    className={cn(
+                                        "relative overflow-hidden group border border-white/10 bg-[#0A0A0A] cursor-zoom-in",
+                                        product.images.length === 1 ? "aspect-[21/9]" : "aspect-[4/5]"
+                                    )}
+                                    onClick={() => setActiveImageIndex(idx)}
                                 >
                                     <Image
                                         src={img.url}
                                         alt={`${product.name} view ${idx + 1}`}
                                         fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                        className="object-cover group-hover:scale-105 transition-all duration-700 ease-in-out"
                                         priority={idx < 2}
+                                        unoptimized // Using Unsplash, unoptimized might be faster for dev/seed testing
                                     />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                                        <div className="bg-neon-green px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-black">
+                                            Expanded Detail 0{idx + 1}
+                                        </div>
+                                    </div>
                                 </motion.div>
                             ))}
-                            {/* If few images, show some placeholders/empty space or stretch */}
                         </div>
                     </div>
 
                     {/* RIGHT COLUMN: STICKY INFO PANEL */}
-                    <div className="lg:col-span-5 xl:col-span-4">
-                        <div className="sticky top-24 space-y-8">
+                    <div className="lg:col-span-12 xl:col-span-4">
+                        <div className="lg:sticky lg:top-24 space-y-10">
                             {/* Product Header */}
-                            <div className="space-y-2">
-                                <h1 className="text-2xl font-bold text-gray-900 leading-tight">
+                            <div className="space-y-4">
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="inline-block px-3 py-1 bg-neon-green text-black font-black uppercase tracking-[0.2em] text-[10px] -skew-x-12"
+                                >
+                                    {product.categories?.[0]?.name || "Premium Collection"}
+                                </motion.div>
+                                <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-[0.9]">
                                     {product.name}
                                 </h1>
-                                <p className="text-gray-500 font-medium text-lg leading-snug">
-                                    {product.categories?.[0]?.name || "Premium Collection"}
-                                </p>
 
-                                <div className="flex items-center gap-2 pt-2">
-                                    <div className="flex items-center bg-gray-50 px-2 py-1 border border-gray-100 rounded">
-                                        <span className="text-sm font-bold mr-1">4.2</span>
-                                        <Star className="w-3.5 h-3.5 fill-black text-black" />
+                                <div className="flex items-center gap-4 pt-2">
+                                    <div className="flex items-center bg-white/5 px-2 py-1 border border-white/10 italic">
+                                        <span className="text-sm font-black mr-1">4.2</span>
+                                        <Star className="w-3.5 h-3.5 fill-neon-green text-neon-green" />
                                     </div>
-                                    <div className="w-[1px] h-4 bg-gray-200" />
-                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">
-                                        1.2K Ratings
+                                    <div className="w-[1px] h-4 bg-white/10" />
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                        1.2K Verified Drops
                                     </span>
                                 </div>
                             </div>
 
-                            <hr className="border-gray-100" />
-
                             {/* Pricing Section */}
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl font-bold">₹{displayPrice.toLocaleString('en-IN')}</span>
+                            <div className="space-y-2">
+                                <div className="flex items-baseline gap-4">
+                                    <span className="text-4xl font-black tracking-tighter text-white">₹{displayPrice.toLocaleString('en-IN')}</span>
                                     {originalPrice && (
                                         <>
-                                            <span className="text-lg text-gray-400 line-through">₹{originalPrice.toLocaleString('en-IN')}</span>
-                                            <span className="text-lg font-bold text-orange-500 uppercase">({discount}% OFF)</span>
+                                            <span className="text-xl text-white/30 line-through font-bold">₹{originalPrice.toLocaleString('en-IN')}</span>
+                                            <span className="text-xl font-black text-electric-pink uppercase italic">-{discount}%</span>
                                         </>
                                     )}
                                 </div>
-                                <p className="text-[11px] font-bold text-teal-600 uppercase tracking-wider">
-                                    Inclusive of all taxes
+                                <p className="text-[10px] font-black text-neon-green uppercase tracking-widest">
+                                    Price includes all digital duties
                                 </p>
                             </div>
 
                             {/* Options / Select Size */}
-                            <div className="space-y-6">
+                            <div className="space-y-8">
                                 {product.options.map((option: any) => (
                                     <div key={option.id} className="space-y-4">
                                         <div className="flex justify-between items-center group">
-                                            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-900 flex items-center gap-2">
+                                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white">
                                                 Select {option.name}
-                                                {!selectedOptions[option.name] && <span className="text-[10px] text-red-500 lowercase font-medium opacity-0 group-hover:opacity-100 transition-opacity">Please select</span>}
+                                                {!selectedOptions[option.name] && <span className="ml-2 text-[9px] text-electric-pink lowercase font-bold opacity-70">Required*</span>}
                                             </h3>
                                             <button className="text-[10px] font-bold text-neon-green uppercase tracking-widest border-b border-neon-green/30 hover:border-neon-green transition-all">
-                                                Size Chart {'>'}
+                                                Size Chart +
                                             </button>
                                         </div>
                                         <div className="flex flex-wrap gap-3">
@@ -151,13 +243,20 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                                     key={val.id}
                                                     onClick={() => handleOptionSelect(option.name, val.value)}
                                                     className={cn(
-                                                        "w-12 h-12 flex items-center justify-center border-2 text-xs font-bold transition-all rounded-full",
+                                                        "w-14 h-14 flex items-center justify-center border-2 text-sm font-black transition-all duration-300 relative overflow-hidden",
                                                         selectedOptions[option.name] === val.value
-                                                            ? "bg-black border-black text-white"
-                                                            : "border-gray-200 hover:border-black text-gray-600"
+                                                            ? "bg-neon-green border-neon-green text-black scale-110 shadow-[0_0_20px_rgba(0,255,65,0.3)]"
+                                                            : "border-white/10 hover:border-white text-white/50 hover:text-white"
                                                     )}
                                                 >
                                                     {val.value}
+                                                    {selectedOptions[option.name] === val.value && (
+                                                        <motion.div
+                                                            layoutId="active-option"
+                                                            className="absolute inset-0 bg-white/10"
+                                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                                        />
+                                                    )}
                                                 </button>
                                             ))}
                                         </div>
@@ -166,108 +265,85 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                             </div>
 
                             {/* Actions */}
-                            <div className="flex gap-4 pt-4">
+                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <Button
                                     onClick={handleAddToCart}
                                     disabled={selectedVariant && selectedVariant.quantity === 0}
-                                    className="h-14 flex-[2] bg-black text-white font-bold uppercase tracking-widest rounded-none text-sm hover:opacity-90 transition-all flex items-center justify-center gap-3 group"
+                                    className="h-16 flex-[2] bg-neon-green text-black font-black uppercase tracking-widest rounded-none text-md hover:bg-neon-green/90 transition-all flex items-center justify-center gap-3 group relative overflow-hidden shadow-[8px_8px_0px_#1A1A1A] hover:shadow-[4px_4px_0px_#1A1A1A] hover:translate-x-[2px] hover:translate-y-[2px]"
                                 >
-                                    <ShoppingBag className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    <ShoppingBag className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                                     Add to Bag
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    className="h-14 flex-1 rounded-none border-2 border-gray-200 font-bold uppercase tracking-widest text-xs hover:border-black transition-all flex items-center justify-center gap-2"
+                                    onClick={handleToggleWishlist}
+                                    disabled={isToggling}
+                                    className={cn(
+                                        "h-16 flex-1 rounded-none border-2 border-white/10 font-black uppercase tracking-widest text-xs hover:border-white transition-all flex items-center justify-center gap-2",
+                                        isInWishlist ? "bg-neon-green text-black border-neon-green" : "hover:bg-white/5"
+                                    )}
                                 >
-                                    <Heart className="w-5 h-5" />
-                                    Wishlist
+                                    <Heart className={cn("w-5 h-5", isInWishlist && "fill-black")} />
+                                    {isInWishlist ? "In Archive" : "Wishlist"}
                                 </Button>
                             </div>
 
                             {/* Delivery Section */}
-                            <div className="space-y-4 pt-4">
-                                <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                                    Delivery Options <Truck className="w-4 h-4" />
+                            <div className="space-y-4 pt-6 p-6 bg-white/5 border border-white/10">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                                    Check Availability <Truck className="w-4 h-4 text-neon-green" />
                                 </h3>
                                 <div className="flex gap-2">
                                     <input
                                         type="text"
-                                        placeholder="Enter Pincode"
-                                        className="h-10 px-4 border border-gray-200 text-xs font-medium focus:outline-none focus:border-black flex-grow"
+                                        placeholder="PINCODE"
+                                        className="h-12 px-4 bg-black border border-white/10 text-xs font-bold focus:outline-none focus:border-neon-green flex-grow placeholder:text-white/20"
                                     />
-                                    <Button variant="ghost" className="h-10 px-4 text-neon-green font-bold text-[10px] uppercase tracking-widest hover:bg-neon-green/5">
+                                    <Button variant="ghost" className="h-12 px-6 text-neon-green font-black text-[10px] uppercase tracking-widest hover:bg-neon-green/5">
                                         Check
                                     </Button>
                                 </div>
-                                <p className="text-[10px] text-gray-400 font-medium">Please enter PIN code to check delivery time & Pay on Delivery Availability</p>
                             </div>
 
                             {/* Trust Badges */}
-                            <div className="grid grid-cols-1 gap-4 pt-6 border-t border-gray-100">
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
-                                        <ShieldCheck className="w-5 h-5 text-gray-700" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[11px] font-bold uppercase tracking-wider">100% Original Products</p>
-                                        <p className="text-[10px] text-gray-500">Authenticity guaranteed</p>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 border border-white/5 bg-charcoal/50 space-y-2">
+                                    <ShieldCheck className="w-5 h-5 text-neon-green" />
+                                    <p className="text-[10px] font-black uppercase tracking-wider leading-tight">100% Legit <br /> <span className="text-muted-foreground">Authenticated</span></p>
                                 </div>
-                                <div className="flex items-center gap-4 group">
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-gray-100 transition-colors">
-                                        <RefreshCcw className="w-5 h-5 text-gray-700" />
-                                    </div>
-                                    <div>
-                                        <p className="text-[11px] font-bold uppercase tracking-wider">Easy 14 days returns</p>
-                                        <p className="text-[10px] text-gray-500">And exchanges policy</p>
-                                    </div>
+                                <div className="p-4 border border-white/5 bg-charcoal/50 space-y-2">
+                                    <RefreshCcw className="w-5 h-5 text-electric-pink" />
+                                    <p className="text-[10px] font-black uppercase tracking-wider leading-tight">Easy Returns <br /> <span className="text-muted-foreground">14 Days Window</span></p>
                                 </div>
                             </div>
 
-                            {/* Offers Card */}
-                            <div className="p-6 bg-orange-50/50 border border-orange-100 space-y-4">
-                                <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-orange-800">
-                                    Best Offers <Tag className="w-3.5 h-3.5" />
-                                </h3>
-                                <ul className="space-y-3">
-                                    <li className="text-[11px] leading-relaxed text-orange-900">
-                                        <strong>10% Instant Discount</strong> on ICICI Bank Credit Card. <br />
-                                        <span className="text-[10px] opacity-70">Min Spend ₹3,500. Max Discount ₹1,000.</span>
-                                    </li>
-                                    <li className="text-[11px] leading-relaxed text-orange-900">
-                                        <strong>Flat ₹200 Off</strong> on your first purchase. <br />
-                                        <span className="text-[10px] opacity-70">Use Code: FUNKYFIRST</span>
-                                    </li>
-                                </ul>
-                                <button className="text-[10px] font-bold text-orange-600 uppercase tracking-widest border-b border-orange-200">
-                                    View All Offers
-                                </button>
-                            </div>
-
-                            {/* Product Specifications */}
-                            <div className="space-y-6 pt-4">
-                                <h3 className="text-xs font-bold uppercase tracking-widest border-b-2 border-black pb-2 inline-block">Product Details</h3>
-                                <div className="space-y-2 text-sm text-gray-600 leading-relaxed font-medium">
-                                    {product.description.split('\n').map((line, i) => (
+                            {/* Product Details Section */}
+                            <div className="space-y-6 pt-10 border-t border-white/10">
+                                <div className="flex items-center gap-4">
+                                    <h3 className="text-xs font-black uppercase tracking-[0.3em] text-neon-green">Product Details</h3>
+                                    <div className="flex-grow h-[1px] bg-white/10" />
+                                </div>
+                                <div className="space-y-4 text-sm text-muted-foreground leading-relaxed font-medium">
+                                    {product.description.split('\n').map((line: string, i: number) => (
                                         <p key={i}>{line}</p>
                                     ))}
                                 </div>
-                                <div className="grid grid-cols-2 gap-y-4 pt-4 border-t border-gray-100">
+                                <div className="grid grid-cols-2 gap-6 pt-6 italic">
                                     <div className="space-y-1">
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase">Material</span>
-                                        <p className="text-xs font-semibold">100% Technical Cotton</p>
+                                        <span className="text-[9px] text-white/30 font-black uppercase tracking-widest">Fabric & Materials</span>
+                                        <p className="text-xs font-bold text-white uppercase">Premium Organic Cotton Mix</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase">Fit</span>
-                                        <p className="text-xs font-semibold">Oversized / Boxy</p>
+                                        <span className="text-[9px] text-white/30 font-black uppercase tracking-widest">Fit Guide</span>
+                                        <p className="text-xs font-bold text-white uppercase">Boxy / Aggressive Oversize</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase">Color</span>
-                                        <p className="text-xs font-semibold">Matte Stealth Black</p>
+                                        <span className="text-[9px] text-white/30 font-black uppercase tracking-widest">Design Details</span>
+                                        <p className="text-xs font-bold text-white uppercase">Matte Zinc Hardware</p>
                                     </div>
                                     <div className="space-y-1">
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase">Style ID</span>
-                                        <p className="text-xs font-semibold font-mono uppercase">{product.sku}</p>
+                                        <span className="text-[9px] text-white/30 font-black uppercase tracking-widest">SKU</span>
+                                        <p className="text-xs font-mono font-bold text-neon-green uppercase">{product.sku}</p>
                                     </div>
                                 </div>
                             </div>
@@ -275,30 +351,36 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     </div>
                 </div>
 
-                {/* Reviews Section Card */}
-                <section className="mt-24 pt-16 border-t border-gray-100">
-                    <div className="flex items-end justify-between mb-12">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-bold uppercase tracking-tight">Ratings & Reviews</h2>
-                            <p className="text-xs text-gray-400 font-medium uppercase tracking-widest font-mono">Verified Purchase Experiences</p>
+                {/* Similar Products Section */}
+                <SimilarProducts slug={product.slug} categories={product.categories} />
+
+                {/* Reviews Section */}
+                <section className="mt-32 pt-16 border-t border-white/10">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                        <div>
+                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">FEED <span className="text-neon-green">BACK</span></h2>
+                            <p className="text-sm text-muted-foreground font-bold uppercase tracking-[0.2em] mt-2">Verified Field Data from the Community</p>
                         </div>
-                        <Button variant="outline" className="rounded-none border-2 border-black font-bold uppercase tracking-widest text-[10px] h-10">
-                            Write a Review
+                        <Button className="rounded-none bg-white text-black font-black uppercase tracking-widest text-[10px] h-12 px-10 hover:bg-neon-green transition-colors">
+                            Leave a Report
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1px bg-white/10 p-[1px]">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="space-y-4 p-6 bg-gray-50 border border-gray-100">
-                                <div className="flex items-center gap-1 text-black">
-                                    {[1, 2, 3, 4, 5].map(j => <Star key={j} className="w-3 h-3 fill-black text-black" />)}
+                            <div key={i} className="space-y-6 p-10 bg-black">
+                                <div className="flex items-center gap-1 text-neon-green">
+                                    {[1, 2, 3, 4, 5].map(j => <Star key={j} className="w-3 h-3 fill-current" />)}
                                 </div>
-                                <p className="text-sm font-medium leading-relaxed italic text-gray-700">
-                                    "Absolutely outstanding build quality. The fit is exactly as described and the fabric feels incredibly premium."
+                                <p className="text-lg font-bold leading-tight uppercase tracking-tight text-white/90">
+                                    "Absolutely outstanding build quality. FIT IS AGGRESSIVE."
                                 </p>
-                                <div className="pt-4 border-t border-gray-200/50 flex items-center justify-between">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">Rohan Malhotra</span>
-                                    <span className="text-[9px] text-gray-400 font-bold">15 FEB 2026</span>
+                                <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-white">USER._{i}09</span>
+                                        <span className="text-[9px] text-neon-green font-bold">VERIFIED_HACKER</span>
+                                    </div>
+                                    <span className="text-[9px] text-white/20 font-bold tracking-widest">15.02.26</span>
                                 </div>
                             </div>
                         ))}
@@ -311,21 +393,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
 function PDPLoading() {
     return (
-        <div className="container mx-auto px-4 py-12 animate-pulse space-y-12">
-            <div className="h-4 w-64 bg-gray-100 rounded" />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[3/4] bg-gray-100" />)}
-                </div>
-                <div className="lg:col-span-4 space-y-8">
-                    <div className="space-y-4">
-                        <div className="h-8 w-full bg-gray-100 rounded" />
-                        <div className="h-4 w-3/4 bg-gray-100 rounded" />
-                    </div>
-                    <div className="h-12 w-48 bg-gray-100 rounded" />
-                    <div className="h-40 w-full bg-gray-100 rounded" />
-                    <div className="h-24 w-full bg-gray-100 rounded" />
-                </div>
+        <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 border-4 border-neon-green border-t-transparent rounded-full animate-spin" />
+                <span className="text-neon-green font-black uppercase tracking-[0.4em] text-xs">Loading Data...</span>
             </div>
         </div>
     )

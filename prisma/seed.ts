@@ -23,7 +23,7 @@ async function main() {
             name: "Neon Essentials",
             slug: "neon-essentials",
             description: "High-visibility garments with neon accents.",
-            image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+            image: "/images/categories/neon-essentials.png",
         },
     })
 
@@ -34,7 +34,7 @@ async function main() {
             name: "Cyber Streetwear",
             slug: "cyber-streetwear",
             description: "Futuristic designs for the urban explorer.",
-            image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920&auto=format&fit=crop",
+            image: "/images/categories/cyber-streetwear.png",
         },
     })
 
@@ -45,7 +45,7 @@ async function main() {
             name: "Minimalist Basics",
             slug: "minimalist-basics",
             description: "Essential pieces for a clean, modern look.",
-            image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1920&auto=format&fit=crop",
+            image: "/images/categories/minimalist-basics.png",
         },
     })
 
@@ -54,18 +54,19 @@ async function main() {
         data: {
             name: "Cyber Neon Hoodie",
             slug: "cyber-neon-hoodie",
-            description: "A premium oversized hoodie with neon green accents and cyber-inspired graphics. Perfect for late-night urban exploration.",
+            description: "A premium oversized hoodie with neon green accents and cyber-inspired graphics. Crafted from heavy-weight technical fleece for ultimate comfort and durability.",
             price: 120.00,
             compareAtPrice: 150.00,
             sku: "CH-001",
             status: ProductStatus.ACTIVE,
-            categoryId: cyberStreetwear.id,
-            metaTitle: "Cyber Neon Hoodie | Ultimate E-Commerce",
-            metaDescription: "The futuristic cyber neon hoodie for your urban adventures.",
+            categories: {
+                connect: [{ id: cyberStreetwear.id }, { id: neonEssentials.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=1972&auto=format&fit=crop", alt: "Cyber Neon Hoodie Front", position: 0 },
-                    { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1974&auto=format&fit=crop", alt: "Cyber Neon Hoodie Detail", position: 1 },
+                    { url: "https://images.unsplash.com/photo-1554568218-0f1715e72254?auto=format&fit=crop&q=80&w=1200", alt: "Cyber Neon Hoodie 1", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?auto=format&fit=crop&q=80&w=1200", alt: "Cyber Neon Hoodie 2", position: 1 },
+                    { url: "https://images.unsplash.com/photo-1509942700367-aba919809730?auto=format&fit=crop&q=80&w=1200", alt: "Cyber Neon Hoodie 3", position: 2 },
                 ]
             },
             options: {
@@ -73,30 +74,9 @@ async function main() {
                     {
                         name: "Size",
                         values: {
-                            create: [
-                                { value: "S" },
-                                { value: "M" },
-                                { value: "L" },
-                                { value: "XL" },
-                            ]
-                        }
-                    },
-                    {
-                        name: "Color",
-                        values: {
-                            create: [
-                                { value: "Neon Green" },
-                                { value: "Cyber Blue" },
-                            ]
+                            create: [{ value: "S" }, { value: "M" }, { value: "L" }, { value: "XL" }]
                         }
                     }
-                ]
-            },
-            tags: {
-                create: [
-                    { name: "Neon" },
-                    { name: "Streetwear" },
-                    { name: "Futuristic" },
                 ]
             }
         }
@@ -106,16 +86,18 @@ async function main() {
         data: {
             name: "Matte Black Tee",
             slug: "matte-black-tee",
-            description: "A luxury minimalist tee crafted from heavy-weight organic cotton. Designed for a perfect boxy fit.",
+            description: "A luxury minimalist tee crafted from heavy-weight organic cotton. Designed for a perfect boxy fit with reinforced seams.",
             price: 45.00,
             sku: "MT-001",
             status: ProductStatus.ACTIVE,
-            categoryId: minimalistBasics.id,
-            metaTitle: "Matte Black Tee | Ultimate E-Commerce",
-            metaDescription: "The essential matte black tee for a minimalist wardrobe.",
+            categories: {
+                connect: [{ id: minimalistBasics.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1920&auto=format&fit=crop", alt: "Matte Black Tee", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=80&w=1200", alt: "Matte Black Tee 1", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1503342452335-ee8c7d55e691?auto=format&fit=crop&q=80&w=1200", alt: "Matte Black Tee 2", position: 1 },
+                    { url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=1200", alt: "Matte Black Tee 3", position: 2 },
                 ]
             },
             options: {
@@ -123,27 +105,14 @@ async function main() {
                     {
                         name: "Size",
                         values: {
-                            create: [
-                                { value: "S" },
-                                { value: "M" },
-                                { value: "L" },
-                                { value: "XL" },
-                            ]
+                            create: [{ value: "S" }, { value: "M" }, { value: "L" }, { value: "XL" }]
                         }
                     }
-                ]
-            },
-            tags: {
-                create: [
-                    { name: "Minimalist" },
-                    { name: "Basics" },
-                    { name: "Black" },
                 ]
             }
         }
     })
 
-    // Add more products
     const stealthCargo = await prisma.product.create({
         data: {
             name: "Stealth Cargo Pants",
@@ -152,22 +121,13 @@ async function main() {
             price: 85.00,
             sku: "SCP-001",
             status: ProductStatus.ACTIVE,
-            categoryId: cyberStreetwear.id,
-            metaTitle: "Stealth Cargo Pants | FunkyStore",
-            metaDescription: "Technical cargo pants for urban exploration.",
+            categories: {
+                connect: [{ id: cyberStreetwear.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=1974&auto=format&fit=crop", alt: "Stealth Cargo Pants", position: 0 },
-                ]
-            },
-            options: {
-                create: [
-                    {
-                        name: "Size",
-                        values: {
-                            create: [{ value: "30" }, { value: "32" }, { value: "34" }, { value: "36" }]
-                        }
-                    }
+                    { url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=1200", alt: "Stealth Cargo Pants 1", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1620012253295-c05718565d6d?auto=format&fit=crop&q=80&w=1200", alt: "Stealth Cargo Pants 2", position: 1 },
                 ]
             }
         }
@@ -177,73 +137,76 @@ async function main() {
         data: {
             name: "Acid Neon Beanie",
             slug: "acid-neon-beanie",
-            description: "A vibrant ribbed knit beanie that adds a sharp pop of color to any techwear fit.",
+            description: "A vibrant ribbed knit beanie that adds a sharp pop of color to any techwear fit. High-visibility and incredibly soft.",
             price: 25.00,
             sku: "ANB-001",
             status: ProductStatus.ACTIVE,
-            categoryId: neonEssentials.id,
-            metaTitle: "Acid Neon Beanie | FunkyStore",
-            metaDescription: "The essential neon accessory.",
+            categories: {
+                connect: [{ id: neonEssentials.id }, { id: cyberStreetwear.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1576871337632-b9aef4c17ab9?q=80&w=1974&auto=format&fit=crop", alt: "Acid Neon Beanie", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1625910513397-22a99c9263f3?auto=format&fit=crop&q=80&w=1200", alt: "Acid Neon Beanie 1", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&q=80&w=1200", alt: "Acid Neon Beanie 2", position: 1 },
                 ]
             }
         }
     })
 
-    const urbanBomber = await prisma.product.create({
+    // Dynamic additions for better UI
+    await prisma.product.create({
         data: {
-            name: "Urban Alpha Bomber",
-            slug: "urban-alpha-bomber",
-            description: "A modernized MA-1 flight jacket with a semi-cropped fit and heavy-duty zippers. Features a subtle iridescent finish.",
-            price: 155.00,
-            sku: "UAB-001",
+            name: "Cyber Ghost Jacket",
+            slug: "cyber-ghost-jacket",
+            description: "Translucent water-proof shell with reflective branding. The ultimate urban protective layer.",
+            price: 185.00,
+            sku: "CGJ-001",
             status: ProductStatus.ACTIVE,
-            categoryId: cyberStreetwear.id,
-            metaTitle: "Urban Alpha Bomber | FunkyStore",
-            metaDescription: "Premium streetwear bomber jacket.",
+            categories: {
+                connect: [{ id: cyberStreetwear.id }, { id: neonEssentials.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=2072&auto=format&fit=crop", alt: "Urban Alpha Bomber", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&q=80&w=1200", alt: "Ghost Jacket 1", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=1200", alt: "Ghost Jacket 2", position: 1 },
                 ]
             }
         }
     })
 
-    const minimalistHoodie = await prisma.product.create({
+    await prisma.product.create({
         data: {
-            name: "Core Ghost Hoodie",
-            slug: "core-ghost-hoodie",
-            description: "Ultra-heavyweight French Terry hoodie in a muted ghost grey. No logos, just pure form and function.",
-            price: 95.00,
-            sku: "CGH-001",
+            name: "Minimalist Shell Parka",
+            slug: "minimal-shell-parka",
+            description: "Clean lines and technical performance. A breathable parka for the minimalist aesthetic.",
+            price: 210.00,
+            sku: "MSP-001",
             status: ProductStatus.ACTIVE,
-            categoryId: minimalistBasics.id,
-            metaTitle: "Core Ghost Hoodie | FunkyStore",
-            metaDescription: "Luxury minimalist grey hoodie.",
+            categories: {
+                connect: [{ id: minimalistBasics.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=1974&auto=format&fit=crop", alt: "Core Ghost Hoodie", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&q=80&w=1200", alt: "Shell Parka", position: 0 },
                 ]
             }
         }
     })
 
-    const techPack = await prisma.product.create({
+    await prisma.product.create({
         data: {
-            name: "Vector Tech Sling",
-            slug: "vector-tech-sling",
-            description: "Modular crossbody sling bag with magnetic Fidlock closure and quick-access pockets.",
-            price: 65.00,
-            sku: "VTS-001",
+            name: "Electro Tech Gloves",
+            slug: "electro-tech-gloves",
+            description: "Touch-sensitive utility gloves with neon stitching.",
+            price: 35.00,
+            sku: "ETG-001",
             status: ProductStatus.ACTIVE,
-            categoryId: cyberStreetwear.id,
-            metaTitle: "Vector Tech Sling | FunkyStore",
-            metaDescription: "Technical sling bag for daily essentials.",
+            categories: {
+                connect: [{ id: neonEssentials.id }]
+            },
             images: {
                 create: [
-                    { url: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1974&auto=format&fit=crop", alt: "Vector Tech Sling", position: 0 },
+                    { url: "https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&q=80&w=1200", alt: "Tech Gloves", position: 0 },
                 ]
             }
         }
