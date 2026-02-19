@@ -10,7 +10,8 @@ import {
     Shield,
     MoreHorizontal,
     Mail,
-    ShoppingBag
+    ShoppingBag,
+    X
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -193,69 +194,113 @@ export default function AdminCustomersPage() {
                 </div>
             </main>
 
-            {/* Mass Mailer Dialog */}
+            {/* Mass Mailer Command Center */}
             <Dialog open={isMailDrawerOpen} onOpenChange={setIsMailDrawerOpen}>
-                <DialogContent className="rounded-none bg-white border-none p-12 max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-4xl font-black uppercase tracking-tighter text-black">
-                            MASS <span className="text-gray-200">MAILER</span>
-                        </DialogTitle>
-                        <DialogDescription className="text-[10px] uppercase tracking-[0.4em] text-gray-400 font-bold mb-8">
-                            Transmitting official communique to {selectedUserIds.length} protocol recipients.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {/* Recipient Segment Preview */}
-                    <div className="bg-gray-50 p-6 flex flex-wrap gap-2 border border-gray-100 mb-8">
-                        {users?.filter(u => selectedUserIds.includes(u.id)).slice(0, 5).map(u => (
-                            <div key={u.id} className="bg-black text-white px-3 py-1 text-[8px] font-black uppercase tracking-widest leading-none">
-                                {u.name || (u.email ? u.email.split('@')[0] : "ANONYMOUS")}
+                <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] bg-white border-none p-0 overflow-y-auto rounded-none shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)]">
+                    <div className="flex flex-col">
+                        {/* Status Bar */}
+                        <div className="bg-black text-white px-8 py-3 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Operational Transmission Active</span>
                             </div>
-                        ))}
-                        {selectedUserIds.length > 5 && (
-                            <div className="bg-gray-200 text-black px-3 py-1 text-[8px] font-black uppercase tracking-widest leading-none">
-                                + {selectedUserIds.length - 5} OTHERS
+                            <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-50">Protocol: CRM-7A</span>
+                        </div>
+
+                        <div className="p-8 lg:p-16 space-y-12">
+                            {/* Header Section */}
+                            <header className="space-y-6">
+                                <div className="flex items-center justify-between border-b border-gray-100 pb-8">
+                                    <div className="space-y-2">
+                                        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-black leading-none">
+                                            CATALOG <span className="text-gray-200">COMMUNIQUE</span>
+                                        </h2>
+                                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">
+                                            Deploying manuscript to {selectedUserIds.length} target operatives
+                                        </p>
+                                    </div>
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => setIsMailDrawerOpen(false)}
+                                        className="h-12 w-12 rounded-full hover:bg-gray-100 transition-colors"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </Button>
+                                </div>
+                            </header>
+
+                            {/* Main Input Flow */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                                <div className="lg:col-span-2 space-y-12">
+                                    <div className="space-y-4">
+                                        <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-black">Subject Line</Label>
+                                        <Input
+                                            placeholder="E.G. EXCLUSIVE SEASONAL ACCESS"
+                                            value={emailSubject}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailSubject(e.target.value.toUpperCase())}
+                                            className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black text-sm tracking-widest px-6"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <Label className="text-[11px] font-black uppercase tracking-[0.4em] text-black">Manuscript Body</Label>
+                                        <Textarea
+                                            placeholder="DRAFT YOUR OFFICIAL TRANSMISSION HERE..."
+                                            value={emailBody}
+                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEmailBody(e.target.value)}
+                                            className="min-h-[350px] bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none p-8 font-medium text-base leading-relaxed placeholder:opacity-50"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Sidebar Intel */}
+                                <div className="space-y-8">
+                                    <div className="bg-gray-50 p-8 border border-gray-100">
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-black border-b border-gray-200 pb-4 mb-6">Target Intel</h3>
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-end">
+                                                <span className="text-3xl font-black tabular-nums">{selectedUserIds.length}</span>
+                                                <span className="text-[10px] font-black uppercase text-gray-400 mb-1">Recipients</span>
+                                            </div>
+                                            <div className="h-[1px] w-full bg-gray-200" />
+                                            <div className="space-y-2">
+                                                {users?.filter(u => selectedUserIds.includes(u.id)).slice(0, 5).map(u => (
+                                                    <p key={u.id} className="text-[10px] font-bold uppercase text-gray-500 truncate">
+                                                        {u.name || (u.email ? u.email.split('@')[0] : "OPERATIVE")}
+                                                    </p>
+                                                ))}
+                                                {selectedUserIds.length > 5 && (
+                                                    <p className="text-[9px] font-black text-gray-300 uppercase tracking-widest pt-2">
+                                                        + {selectedUserIds.length - 5} ADDITIONAL
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="bg-black/5 p-6 border-l-2 border-black">
+                                            <p className="text-[9px] font-bold text-gray-400 leading-relaxed uppercase">
+                                                Finalizing this deployment will transmit the communique to all selected accounts. Protocol adherence is mandatory.
+                                            </p>
+                                        </div>
+
+                                        <Button
+                                            className="w-full bg-black text-white font-black uppercase h-20 rounded-none tracking-widest text-xs hover:bg-gray-900 transition-all border border-black shadow-[6px_6px_0px_rgba(0,0,0,0.1)] active:shadow-none translate-x-0 active:translate-x-1 active:translate-y-1"
+                                            disabled={!emailSubject || !emailBody || sendBulkEmail.isPending}
+                                            onClick={handleSendBulk}
+                                        >
+                                            {sendBulkEmail.isPending ? "TRANSMITTING..." : "DEPLOY CAMPAIGN"}
+                                        </Button>
+
+                                        <p className="text-[8px] font-black uppercase tracking-[0.3em] text-gray-300 text-center">
+                                            Security Level: Admin Restricted
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-10 py-10">
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-black ml-1">Communique Subject</Label>
-                            <Input
-                                placeholder="E.G. EXCLUSIVE SEASONAL ACCESS"
-                                value={emailSubject}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmailSubject(e.target.value.toUpperCase())}
-                                className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black text-xs tracking-widest"
-                            />
-                        </div>
-
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-black ml-1">Manuscript Body</Label>
-                            <Textarea
-                                placeholder="DRAFT YOUR TRANSMISSION HERE..."
-                                value={emailBody}
-                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEmailBody(e.target.value)}
-                                className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[300px] font-medium text-xs p-8 leading-relaxed"
-                            />
                         </div>
                     </div>
-
-                    <DialogFooter className="pt-8 gap-4 sm:justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-black animate-pulse" />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-black/30">
-                                SEGMENT: SELECTED {selectedUserIds.length}
-                            </span>
-                        </div>
-                        <Button
-                            className="bg-black text-white font-black uppercase h-16 px-16 rounded-none tracking-widest text-[11px] hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[8px_8px_0px_#f3f4f6] hover:shadow-none border border-black"
-                            disabled={!emailSubject || !emailBody || sendBulkEmail.isPending}
-                            onClick={handleSendBulk}
-                        >
-                            {sendBulkEmail.isPending ? "TRANSMITTING..." : "DEPLOY CAMPAIGN"}
-                        </Button>
-                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

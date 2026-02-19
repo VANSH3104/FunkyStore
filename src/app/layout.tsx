@@ -11,6 +11,13 @@ const poppins = Poppins({
   variable: "--font-poppins"
 });
 
+import { Playfair_Display } from "next/font/google";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair"
+});
+
 export const metadata: Metadata = {
   title: "Luxecho | Ultra-Premium E-Commerce",
   description: "Experience modern luxury with Luxecho.",
@@ -30,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", poppins.variable)}>
+      <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", poppins.variable, playfair.variable)}>
         <TRPCReactProvider>
           <ThemeProvider
             attribute="class"

@@ -33,7 +33,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
-export default function ProductsPage() {
+function ProductsContent() {
     const searchParams = useSearchParams()
     const initialSearch = searchParams.get("search") || ""
 
@@ -388,5 +388,19 @@ export default function ProductsPage() {
                 </main>
             </div>
         </div>
+    )
+}
+
+import { Suspense } from "react"
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+            </div>
+        }>
+            <ProductsContent />
+        </Suspense>
     )
 }

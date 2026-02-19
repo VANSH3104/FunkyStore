@@ -63,8 +63,8 @@ export function Navbar() {
         <>
             <header
                 className={cn(
-                    "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-gray-100 bg-white/80 backdrop-blur-md",
-                    isScrolled ? "h-14 shadow-[0_2px_20px_-12px_rgba(139,92,246,0.1)]" : "h-20"
+                    "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-brand-copper/10 bg-brand-cream/90 backdrop-blur-md",
+                    isScrolled ? "h-14 shadow-[0_2px_20px_-12px_rgba(194,126,105,0.15)]" : "h-20"
                 )}
             >
                 <nav className="container h-full mx-auto px-6 lg:px-12 flex items-center justify-between">
@@ -72,9 +72,9 @@ export function Navbar() {
                     <div className="hidden md:flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 -ml-2 hover:opacity-70 transition-opacity"
+                            className="p-2 -ml-2 hover:text-brand-copper transition-colors"
                         >
-                            <Menu className="w-6 h-6" strokeWidth={1.5} />
+                            <Menu className="w-6 h-6" strokeWidth={1} />
                         </button>
                     </div>
 
@@ -82,17 +82,17 @@ export function Navbar() {
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 -ml-2"
+                            className="p-2 -ml-2 hover:text-brand-copper transition-colors"
                         >
-                            <Menu className="w-6 h-6" strokeWidth={1.5} />
+                            <Menu className="w-6 h-6" strokeWidth={1} />
                         </button>
                     </div>
 
                     {/* Centralized Logo */}
                     <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 group">
-                        <LuxechoLogo size={36} className="group-hover:scale-110 transition-transform duration-500" />
-                        <span className="text-sm font-black tracking-[0.4em] uppercase group-hover:tracking-[0.5em] transition-all duration-700">
-                            Luxecho
+                        <LuxechoLogo size={42} className="group-hover:scale-105 transition-transform duration-700" />
+                        <span className="text-xl font-serif text-brand-charcoal tracking-tight group-hover:tracking-wider transition-all duration-700">
+                            luxecho
                         </span>
                     </Link>
 
@@ -130,8 +130,8 @@ export function Navbar() {
                             <div className="flex flex-col h-full">
                                 <div className="p-6 border-b flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <LuxechoLogo size={28} />
-                                        <span className="text-sm font-black tracking-widest uppercase">Luxecho</span>
+                                        <LuxechoLogo size={32} />
+                                        <span className="text-lg font-serif text-brand-charcoal">luxecho</span>
                                     </div>
                                     <button onClick={() => setIsMobileMenuOpen(false)}>
                                         <X className="w-6 h-6" strokeWidth={1} />

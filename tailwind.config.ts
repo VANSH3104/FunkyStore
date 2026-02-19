@@ -53,6 +53,11 @@ const config = {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				'charcoal': '#111111',
+				'brand': {
+					copper: '#c27e69',
+					cream: '#fcfbf8',
+					charcoal: '#2d3436',
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -93,6 +98,10 @@ const config = {
 				'var(--font-poppins)',
 				'Inter',
 				'sans-serif'
+			],
+			serif: [
+				'var(--font-playfair)',
+				'serif'
 			],
 			heading: [
 				'var(--font-poppins)',
