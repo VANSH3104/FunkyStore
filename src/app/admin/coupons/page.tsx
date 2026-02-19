@@ -27,7 +27,7 @@ export default function AdminCouponsPage() {
     const deleteCoupon = api.admin.deleteCoupon.useMutation({
         onSuccess: () => {
             utils.admin.getCoupons.invalidate()
-            toast({ title: "PROTOCOL DELETED", description: "Discount code has been purged from system." })
+            toast({ title: "COUPON DELETED", description: "The discount code has been removed." })
         }
     })
 
@@ -36,7 +36,7 @@ export default function AdminCouponsPage() {
             <aside className="w-64 border-r-4 border-black bg-charcoal hidden lg:flex flex-col">
                 <div className="p-8 border-b-4 border-black">
                     <span className="text-2xl font-black uppercase italic tracking-tighter">
-                        ADM <span className="text-neon-green">/ HUB</span>
+                        ADMIN <span className="text-gray-400">DASHBOARD</span>
                     </span>
                 </div>
                 <nav className="p-4 flex-grow space-y-2">
@@ -52,7 +52,7 @@ export default function AdminCouponsPage() {
                                 variant="ghost"
                                 className={cn(
                                     "w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2",
-                                    item.active ? "border-neon-green bg-black text-white" : "border-transparent text-muted-foreground hover:text-white"
+                                    item.active ? "border-black bg-black text-white" : "border-transparent text-muted-foreground hover:text-white"
                                 )}
                             >
                                 {item.name}
@@ -70,33 +70,33 @@ export default function AdminCouponsPage() {
                             Back to Command Center
                         </Link>
                         <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
-                            DISCOUNT <span className="text-neon-green">/ CODES</span>
+                            COUPON <span className="text-gray-400">CODES</span>
                         </h1>
                     </div>
-                    <Button className="bg-neon-green text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                        <Plus className="w-6 h-6 mr-2" /> GENERATE CODE
+                    <Button className="bg-white text-black font-black uppercase rounded-none h-16 px-12 shadow-[8px_8px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                        <Plus className="w-6 h-6 mr-2" /> CREATE COUPON
                     </Button>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {isLoading ? (
-                        <div className="col-span-full py-24 text-center font-black uppercase italic animate-pulse">Syncing Discount Protocols...</div>
+                        <div className="col-span-full py-24 text-center font-black uppercase italic animate-pulse">Syncing Active Coupons...</div>
                     ) : coupons?.length === 0 ? (
                         <div className="col-span-full py-24 text-center border-4 border-dashed border-charcoal">
                             <Tag className="w-16 h-16 text-charcoal mx-auto mb-4" />
-                            <h2 className="text-2xl font-black uppercase italic text-muted-foreground">No Discount Protocols Active</h2>
-                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-2">Initialize gear reductions via the generator.</p>
+                            <h2 className="text-2xl font-black uppercase italic text-muted-foreground">No Active Coupons</h2>
+                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-2">Create a new coupon to get started.</p>
                         </div>
                     ) : coupons?.map((coupon: any) => (
                         <div key={coupon.id} className="bg-charcoal p-8 border-2 border-charcoal hover:border-white transition-all group relative">
                             <div className="flex justify-between items-start mb-6">
                                 <div className="p-3 bg-black/40 border border-white/10">
-                                    {coupon.discountType === "PERCENTAGE" ? <Percent className="w-6 h-6 text-neon-green" /> : <DollarSign className="w-6 h-6 text-neon-green" />}
+                                    {coupon.discountType === "PERCENTAGE" ? <Percent className="w-6 h-6 text-white" /> : <DollarSign className="w-6 h-6 text-white" />}
                                 </div>
                                 <Button
                                     variant="ghost"
                                     onClick={() => deleteCoupon.mutate({ id: coupon.id })}
-                                    className="text-muted-foreground hover:text-electric-pink p-0 h-fit"
+                                    className="text-muted-foreground hover:text-red-500 p-0 h-fit"
                                 >
                                     <Trash2 className="w-5 h-5" />
                                 </Button>
@@ -105,7 +105,7 @@ export default function AdminCouponsPage() {
                             <div className="space-y-4">
                                 <div>
                                     <h3 className="text-3xl font-black italic tracking-tighter uppercase">{coupon.code}</h3>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{coupon.description || "NO DESIGNATION"}</p>
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{coupon.description || "NO DESCRIPTION"}</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/5">
@@ -125,11 +125,11 @@ export default function AdminCouponsPage() {
 
                                 <div className="space-y-2 pt-2">
                                     <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        <Clock className="w-3 h-3 text-neon-green" />
+                                        <Clock className="w-3 h-3 text-white" />
                                         EXPIRES: {coupon.endDate ? format(new Date(coupon.endDate), "MMM dd, yyyy") : "NEVER"}
                                     </div>
                                     <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        <Calendar className="w-3 h-3 text-cyber-blue" />
+                                        <Calendar className="w-3 h-3 text-gray-400" />
                                         CREATED: {format(new Date(coupon.createdAt), "MMM dd, yyyy")}
                                     </div>
                                 </div>

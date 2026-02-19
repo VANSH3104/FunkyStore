@@ -15,7 +15,7 @@ export function LanguageSection() {
   return (
     <div className="border-b border-border pb-4 last:border-b-0">
       <div className="flex items-center gap-2 mb-3">
-        <Globe className="w-4 h-4 text-neon-green" />
+        <Globe className="w-4 h-4 text-white" />
         <label className="text-sm font-medium">Language & Region</label>
       </div>
       <div className="space-y-2">
@@ -23,11 +23,10 @@ export function LanguageSection() {
           <button
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${
-              language === lang.code
-                ? "bg-neon-green text-black font-medium"
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded text-sm transition-colors ${language === lang.code
+                ? "bg-white text-black font-medium"
                 : "bg-muted text-foreground hover:bg-muted/80"
-            }`}
+              }`}
           >
             <span className="text-lg">{lang.flag}</span>
             <div className="flex-1 text-left">

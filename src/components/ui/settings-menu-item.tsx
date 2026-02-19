@@ -12,7 +12,7 @@ export function SettingsMenuItem({ onClick }: { onClick?: () => void }) {
     return (
         <button
             onClick={handleClick}
-            className="w-full flex items-center gap-3 hover:bg-neon-green hover:text-black cursor-pointer uppercase text-xs font-bold tracking-widest p-2"
+            className="w-full flex items-center gap-3 hover:bg-white hover:text-black cursor-pointer uppercase text-xs font-bold tracking-widest p-2"
         >
             <Settings className="w-4 h-4" />
             <span>Settings</span>

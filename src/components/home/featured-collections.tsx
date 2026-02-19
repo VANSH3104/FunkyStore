@@ -65,6 +65,7 @@ export function FeaturedCollections() {
                                 alt={collection.title}
                                 fill
                                 className="object-cover group-hover:scale-105 transition-all duration-1000"
+                                unoptimized
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 

@@ -7,7 +7,11 @@ const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined
 }
 
-const pool = new Pool({ connectionString: env.DATABASE_URL })
+const databaseUrl = env.USE_LOCAL_DB === "true" && env.LOCAL_DATABASE_URL
+    ? env.LOCAL_DATABASE_URL
+    : env.DATABASE_URL
+
+const pool = new Pool({ connectionString: databaseUrl })
 const adapter = new PrismaPg(pool)
 
 export const db =

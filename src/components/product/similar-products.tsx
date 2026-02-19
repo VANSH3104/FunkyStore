@@ -47,10 +47,10 @@ export function SimilarProducts({ slug, categories }: SimilarProductsProps) {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
                 <div>
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter italic">
-                        SIMILAR <span className="text-neon-green">DROPS</span>
+                        SIMILAR <span className="text-gray-400">ITEMS</span>
                     </h2>
                     <p className="text-muted-foreground uppercase tracking-widest font-bold text-[10px] mt-2">
-                        More experiments from the same lab
+                        Recommended products you might like
                     </p>
                 </div>
 
@@ -65,7 +65,7 @@ export function SimilarProducts({ slug, categories }: SimilarProductsProps) {
                                 className={cn(
                                     "rounded-none font-black uppercase text-[10px] tracking-widest transition-all",
                                     activeCategoryId === cat.id
-                                        ? "bg-neon-green text-black border-neon-green"
+                                        ? "bg-white text-black border-white"
                                         : "border-white/10 hover:border-white text-white"
                                 )}
                             >

@@ -110,6 +110,9 @@ model Product {
   publishedAt     DateTime?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
+  productInfo     String?             @db.Text
+  shippingReturns String?             @db.Text
+  additionalInfo  String?             @db.Text
   cartItems       CartItem[]
   collections     CollectionProduct[]
   orderItems      OrderItem[]

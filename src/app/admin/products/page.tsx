@@ -20,6 +20,7 @@ import {
     Tag as TagIcon
 } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -131,7 +132,14 @@ export default function AdminProductsPage() {
                                         <div className="flex items-center gap-6">
                                             <div className="w-16 h-20 bg-gray-50 border border-gray-100 flex-shrink-0 relative overflow-hidden">
                                                 {product.images?.[0] && (
-                                                    <img src={product.images[0].url} className="w-full h-full object-cover" />
+                                                    <Image
+                                                        src={product.images[0].url}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="w-full h-full object-cover"
+                                                        sizes="64px"
+                                                        quality={80}
+                                                    />
                                                 )}
                                             </div>
                                             <div>

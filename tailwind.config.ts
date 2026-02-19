@@ -52,14 +52,7 @@ const config = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				'funky-violet': '#8B5CF6',
-				'acid-green': '#d4ff00',
-				'acid-yellow': '#f0ff00',
-				'electric-pink': '#ff00ae',
-				'cyber-blue': '#00f0ff',
 				'charcoal': '#111111',
-				'neon-purple': '#9333ea',
-				'neon-cyan': '#06b6d4',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -88,37 +81,28 @@ const config = {
 						transform: 'translateX(100%)'
 					}
 				},
-				glow: {
-					'0%, 100%': {
-						opacity: '1'
-					},
-					'50%': {
-						opacity: '0.5'
-					}
-				}
-			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				shimmer: 'shimmer 2s infinite',
-				glow: 'glow 2s ease-in-out infinite'
-			},
-			fontFamily: {
-				sans: [
-					'var(--font-poppins)',
-					'Inter',
-					'sans-serif'
-				],
-				heading: [
-					'var(--font-poppins)',
-					'Inter',
-					'sans-serif'
-				]
-			},
-			transitionTimingFunction: {
-				'ease-out-expo': 'cubic-bezier(0.19, 1, 0.22, 1)',
-				'ease-out-quad': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 			}
+		},
+		animation: {
+			'accordion-down': 'accordion-down 0.2s ease-out',
+			'accordion-up': 'accordion-up 0.2s ease-out',
+			shimmer: 'shimmer 2s infinite',
+		},
+		fontFamily: {
+			sans: [
+				'var(--font-poppins)',
+				'Inter',
+				'sans-serif'
+			],
+			heading: [
+				'var(--font-poppins)',
+				'Inter',
+				'sans-serif'
+			]
+		},
+		transitionTimingFunction: {
+			'ease-out-expo': 'cubic-bezier(0.19, 1, 0.22, 1)',
+			'ease-out-quad': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

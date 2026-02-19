@@ -122,6 +122,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
                                 className="object-cover"
                                 sizes="(max-width: 768px) 50vw, 33vw"
                                 priority={priority}
+                                unoptimized
                             />
                         </motion.div>
                     </AnimatePresence>
@@ -203,7 +204,10 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
                 <div className="flex flex-col items-end gap-1">
                     <span className="text-sm font-black text-black leading-none">₹{price.toLocaleString('en-IN')}</span>
                     {hasDiscount && (
-                        <span className="text-[10px] text-gray-400 line-through font-bold leading-none">₹{comparePrice?.toLocaleString('en-IN')}</span>
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="text-[10px] text-gray-400 line-through font-bold leading-none">₹{comparePrice?.toLocaleString('en-IN')}</span>
+                            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">-{discount}% OFF</span>
+                        </div>
                     )}
                 </div>
             </div>

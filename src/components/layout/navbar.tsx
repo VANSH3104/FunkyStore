@@ -107,6 +107,9 @@ export function Navbar() {
                 </div>
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetContent side="left" className="bg-white border-r border-gray-100 p-0 w-[300px]">
+                        <SheetHeader className="sr-only">
+                            <SheetTitle>Navigation Menu</SheetTitle>
+                        </SheetHeader>
                         <div className="flex flex-col h-full">
                             <div className="p-6 border-b flex justify-between items-center">
                                 <div className="flex items-center gap-3">

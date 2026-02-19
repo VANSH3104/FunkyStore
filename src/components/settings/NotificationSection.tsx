@@ -68,7 +68,7 @@ export function NotificationSection() {
       {/* Product Recommendations */}
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-neon-green" />
+          <Sparkles className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Product Recommendations</label>
         </div>
         <SettingsToggle
@@ -83,7 +83,7 @@ export function NotificationSection() {
       {/* Auto-Save Cart */}
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
-          <Bookmark className="w-4 h-4 text-neon-green" />
+          <Bookmark className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Save Cart Items</label>
         </div>
         <SettingsToggle

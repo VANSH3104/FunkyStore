@@ -20,7 +20,7 @@ export function ExpandableSection({ title, icon, children, defaultExpanded = fal
         className="w-full flex items-center justify-between py-3 hover:bg-muted/50 px-1 transition-colors"
       >
         <div className="flex items-center gap-2">
-          {icon && <span className="text-neon-green">{icon}</span>}
+          {icon && <span className="text-white">{icon}</span>}
           <span className="text-sm font-medium">{title}</span>
         </div>
         <ChevronDown

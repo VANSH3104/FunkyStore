@@ -59,7 +59,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         variant="ghost"
                         size="icon"
                         onClick={onClose}
-                        className="absolute top-8 right-8 text-white hover:text-neon-green transition-colors"
+                        className="absolute top-8 right-8 text-white hover:text-gray-400 transition-colors"
                     >
                         <X className="w-8 h-8" />
                     </Button>
@@ -71,13 +71,13 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                 placeholder="SEARCH PRODUCTS..."
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                className="h-24 bg-transparent border-b-4 border-charcoal focus:border-neon-green rounded-none text-4xl md:text-6xl font-black uppercase italic tracking-tighter placeholder:text-charcoal transition-all text-white outline-none ring-0 focus-visible:ring-0"
+                                className="h-24 bg-transparent border-b-2 border-charcoal focus:border-white rounded-none text-4xl md:text-6xl font-black uppercase italic tracking-tighter placeholder:text-charcoal transition-all text-white outline-none ring-0 focus-visible:ring-0"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                 {isLoading ? (
-                                    <Loader2 className="w-10 h-10 text-neon-green animate-spin" />
+                                    <Loader2 className="w-10 h-10 text-white animate-spin" />
                                 ) : (
-                                    <Search className="w-10 h-10 text-charcoal group-focus-within:text-neon-green transition-colors" />
+                                    <Search className="w-10 h-10 text-charcoal group-focus-within:text-white transition-colors" />
                                 )}
                             </div>
                         </div>
@@ -94,7 +94,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                     <div
                                         key={item.id}
                                         onClick={() => handleSelect(item.slug)}
-                                        className="flex gap-4 p-4 bg-charcoal border-2 border-transparent hover:border-neon-green transition-all cursor-pointer group"
+                                        className="flex gap-4 p-4 bg-charcoal border border-transparent hover:border-white transition-all cursor-pointer group"
                                     >
                                         <div className="relative w-20 aspect-square bg-deep-black overflow-hidden flex-shrink-0">
                                             {item.images[0] && (
@@ -110,12 +110,12 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                                             <p className="text-xs text-muted-foreground font-black uppercase tracking-widest leading-none">
                                                 {item.category?.name}
                                             </p>
-                                            <p className="text-lg font-black uppercase italic tracking-tight group-hover:text-neon-green transition-colors">
+                                            <p className="text-lg font-black uppercase italic tracking-tight group-hover:text-gray-300 transition-colors">
                                                 {item.name}
                                             </p>
                                             <div className="flex items-center gap-2 text-white font-black">
                                                 <span>${item.price.toString()}</span>
-                                                <ArrowRight className="w-4 h-4 text-neon-green opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0" />
+                                                <ArrowRight className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0" />
                                             </div>
                                         </div>
                                     </div>
@@ -125,7 +125,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
                         <div className="pt-12 text-center">
                             <Link href={`/products?search=${query}`} onClick={onClose}>
-                                <Button className="bg-neon-green text-black font-black uppercase px-12 h-16 rounded-none text-xl shadow-[8px_8px_0px_#fff] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                                <Button className="bg-white text-black font-black uppercase px-12 h-16 rounded-none text-xl shadow-[8px_8px_0px_rgba(255,255,255,0.2)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                                     VIEW ALL RESULTS
                                 </Button>
                             </Link>
@@ -134,9 +134,9 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
 
                     <div className="mt-auto pb-12 flex gap-8 items-center justify-center opacity-20 text-[10px] font-black uppercase tracking-[0.5em] text-white">
                         <span>QUALITY</span>
-                        <div className="w-2 h-2 rounded-full bg-neon-green" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                         <span>ESSENTIAL</span>
-                        <div className="w-2 h-2 rounded-full bg-neon-green" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/30" />
                         <span>PREMIUM</span>
                     </div>
                 </motion.div>

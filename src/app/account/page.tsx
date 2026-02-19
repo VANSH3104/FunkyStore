@@ -6,36 +6,33 @@ import { api } from "@/trpc/react"
 import {
     ShoppingBag,
     MapPin,
-    Wallet,
     User,
     LogOut,
     ChevronRight,
     Heart,
-    RefreshCw,
-    Gift,
-    Star,
-    Store,
     Settings,
-    HelpCircle,
-    LayoutGrid,
-    Users,
     ShieldCheck,
-    Zap,
-    Lock
+    Lock,
+    Package,
+    ArrowRight
 } from "lucide-react"
 import Link from "next/link"
 import { AuthPortal } from "@/components/auth/auth-portal"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 export default function ProfilePage() {
     const { data: session, status } = useSession()
     const [activeTab, setActiveTab] = React.useState("overview")
 
+    const { data: profile } = api.account.getProfile.useQuery(undefined, {
+        enabled: !!session,
+    })
+
     if (status === "loading") {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-black rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-gray-100 border-t-black rounded-full animate-spin" />
             </div>
         )
     }
@@ -47,174 +44,143 @@ export default function ProfilePage() {
     const { user } = session
 
     const sidebarItems = [
-        { id: "overview", label: "Dashboard", icon: LayoutGrid },
-        { id: "profile", label: "Identity", icon: User },
-        { id: "orders", label: "Acquisitions", icon: ShoppingBag },
-        { id: "wishlist", label: "Vault", icon: Heart },
-        { id: "settings", label: "Security", icon: Lock },
-        ...(user.role === "ADMIN" ? [{ id: "admin", label: "Command Center", icon: ShieldCheck, href: "/admin" }] : []),
+        { id: "overview", label: "Dashboard", icon: Package, href: "/account" },
+        { id: "orders", label: "My Orders", icon: ShoppingBag, href: "/account/orders" },
+        { id: "wishlist", label: "Wishlist", icon: Heart, href: "/account/wishlist" },
+        { id: "addresses", label: "Addresses", icon: MapPin, href: "/account/addresses" },
+        { id: "profile", label: "Account Settings", icon: User, href: "/account/settings" },
+        ...(user.role === "ADMIN" ? [{ id: "admin", label: "Admin Panel", icon: ShieldCheck, href: "/admin" }] : []),
     ]
 
-    const actionCards = [
-        { title: "Acquisitions", desc: "Track and manage your recent drops", icon: ShoppingBag },
-        { title: "The Vault", desc: "Your curated high-end selection", icon: Heart },
-        { title: "Identity", desc: "Manage your technical profile", icon: User },
-        { title: "Security", desc: "System access and password protocols", icon: Lock },
-        ...(user.role === "ADMIN" ? [{ title: "Command Center", desc: "Privileged system access", icon: ShieldCheck, href: "/admin" }] : []),
+    const quickActions = [
+        { title: "Recent Orders", desc: "Track and manage your recent purchases", icon: ShoppingBag, href: "/account/orders" },
+        { title: "Wishlist", desc: "Your curated selection of favorites", icon: Heart, href: "/account/wishlist" },
+        { title: "Addresses", desc: "Manage your delivery locations", icon: MapPin, href: "/account/addresses" },
     ]
 
     return (
-        <div className="min-h-screen bg-white selection:bg-black selection:text-white">
-            <div className="container mx-auto px-4 py-12 max-w-7xl">
-                <div className="flex flex-col lg:grid lg:grid-cols-12 gap-16">
-                    {/* LEFT COLUMN: TECHNICAL NAVIGATION */}
-                    <aside className="lg:col-span-3 space-y-12">
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-1.5 h-6 bg-black" />
-                                <h3 className="text-[12px] font-black uppercase tracking-[0.4em]">Navigation</h3>
-                            </div>
-                            <nav className="border border-gray-100 divide-y divide-gray-50 bg-white shadow-sm">
-                                {sidebarItems.map((item) => {
-                                    const IsActive = activeTab === item.id
-                                    const Component = item.href ? Link : 'button'
+        <div className="min-h-screen bg-[#FAFAFA] text-black">
+            <div className="container mx-auto px-4 py-8 lg:py-16 max-w-7xl">
+                <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 lg:gap-12">
+                    {/* LEFT COLUMN: NAVIGATION */}
+                    <aside className="lg:col-span-3">
+                        <div className="sticky top-8 space-y-8">
+                            <div className="bg-white border border-gray-100 p-6 shadow-sm">
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">Account Menu</h3>
+                                <nav className="space-y-1">
+                                    {sidebarItems.map((item) => {
+                                        const IsActive = activeTab === item.id || (item.id === "overview" && activeTab === "overview")
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                href={item.href}
+                                                className={cn(
+                                                    "flex items-center justify-between px-4 py-3 transition-all group rounded-sm",
+                                                    IsActive
+                                                        ? "bg-black text-white"
+                                                        : "text-gray-500 hover:text-black hover:bg-gray-50"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <item.icon className={cn("w-4 h-4", IsActive ? "text-white" : "text-gray-400 group-hover:text-black")} />
+                                                    <span className="text-xs font-semibold">{item.label}</span>
+                                                </div>
+                                                <ChevronRight className={cn(
+                                                    "w-3 h-3 transition-transform",
+                                                    IsActive ? "translate-x-0.5 opacity-100" : "opacity-0 group-hover:opacity-100"
+                                                )} />
+                                            </Link>
+                                        )
+                                    })}
+                                </nav>
 
-                                    return (
-                                        <Component
-                                            key={item.id}
-                                            {...(item.href ? { href: item.href } : { onClick: () => setActiveTab(item.id) })}
-                                            className={cn(
-                                                "w-full flex items-center justify-between px-8 py-6 text-left transition-all group",
-                                                IsActive
-                                                    ? "bg-black text-white"
-                                                    : "text-gray-400 hover:text-black hover:bg-gray-50"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-5">
-                                                <item.icon className={cn("w-4 h-4", IsActive ? "text-acid-green" : "text-gray-300 group-hover:text-black")} />
-                                                <span className="text-[11px] font-bold tracking-[0.2em] uppercase">{item.label}</span>
-                                            </div>
-                                            <ChevronRight className={cn(
-                                                "w-4 h-4 transition-transform",
-                                                IsActive ? "translate-x-1 opacity-100" : "opacity-0 group-hover:opacity-40"
-                                            )} />
-                                        </Component>
-                                    )
-                                })}
-                            </nav>
+                                <button
+                                    onClick={() => signOut()}
+                                    className="w-full mt-8 flex items-center gap-4 px-4 py-3 text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all rounded-sm group"
+                                >
+                                    <LogOut className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
+                                    <span className="text-xs font-semibold">Sign Out</span>
+                                </button>
+                            </div>
+
+                            {/* Need Help Card */}
+                            <div className="bg-black text-white p-8 space-y-4 shadow-xl">
+                                <h4 className="text-xs font-bold uppercase tracking-[0.1em]">Need Assistance?</h4>
+                                <p className="text-[11px] text-gray-400 leading-relaxed">
+                                    Our support team is available 24/7 to help with your orders and account.
+                                </p>
+                                <Link href="/support" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest border-b border-white pb-1 hover:text-gray-300 transition-colors">
+                                    Contact Support <ArrowRight className="w-3 h-3" />
+                                </Link>
+                            </div>
                         </div>
-
-                        <button
-                            onClick={() => signOut()}
-                            className="w-full flex items-center justify-between px-8 py-6 border border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all font-bold text-[11px] tracking-[0.2em] uppercase group"
-                        >
-                            <div className="flex items-center gap-5">
-                                <LogOut className="w-4 h-4" />
-                                <span>Terminate Access</span>
-                            </div>
-                        </button>
                     </aside>
 
-                    {/* RIGHT COLUMN: INTERACTIVE CORE */}
-                    <main className="lg:col-span-9 space-y-12">
-                        {/* THE ELITE BANNER */}
-                        <div className="relative bg-black text-white p-12 md:p-16 overflow-hidden min-h-[350px] flex flex-col justify-center border-b-8 border-acid-green shadow-[24px_24px_0px_rgba(0,0,0,0.03)]">
-                            {/* Technical Backdrop */}
-                            <div className="absolute inset-0 z-0 opacity-60">
-                                <div className="absolute top-0 right-0 w-[60%] h-full bg-[radial-gradient(circle_at_100%_0%,rgba(212,255,0,0.15),transparent_60%)]" />
-                                <div className="absolute bottom-0 left-0 w-[40%] h-full bg-[radial-gradient(circle_at_0%_100%,rgba(6,182,212,0.1),transparent_60%)]" />
-                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.08] mix-blend-overlay" />
-
-                                {/* Moving Grid Effect */}
-                                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]" />
-                            </div>
-
-                            <div className="relative z-10 space-y-10">
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-acid-green text-[10px] font-black uppercase tracking-[0.5em] animate-pulse">
-                                        <Zap className="w-4 h-4 fill-current" />
-                                        System_Online // Access_Level: Elite
-                                    </div>
-                                    <h2 className="text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-[0.8]">
-                                        ACCESS <span className="text-acid-green">GRANTED,</span><br />
-                                        {user.name?.split(' ')[0] || "USER_01"}
+                    {/* RIGHT COLUMN: CONTENT */}
+                    <main className="lg:col-span-9 space-y-8">
+                        {/* WELCOME SECTION */}
+                        <section className="bg-white border border-gray-100 p-8 lg:p-12 shadow-sm italic">
+                            <div className="max-w-2xl space-y-6">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Welcome Back</p>
+                                    <h2 className="text-4xl lg:text-5xl font-black uppercase tracking-tight leading-none">
+                                        Hello, <span className="text-gray-400">{user.name?.split(' ')[0] || "Guest"}</span>.
                                     </h2>
                                 </div>
-
-                                <div className="flex flex-wrap gap-8">
-                                    <div className="flex items-center gap-3 text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group cursor-default">
-                                        <ShieldCheck className="w-5 h-5 text-acid-green/40 group-hover:text-acid-green transition-colors" />
-                                        Verified Signature
-                                    </div>
-                                    <div className="flex items-center gap-3 text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group cursor-default">
-                                        <Users className="w-5 h-5 text-acid-green/40 group-hover:text-acid-green transition-colors" />
-                                        Core Membership
-                                    </div>
-                                    <div className="flex items-center gap-3 text-[10px] font-black text-white/40 uppercase tracking-[0.3em] group cursor-default">
-                                        <Wallet className="w-5 h-5 text-acid-green/40 group-hover:text-acid-green transition-colors" />
-                                        Style Credits: Active
-                                    </div>
-                                </div>
-
-                                <div className="pt-8 space-y-4 max-w-xl">
-                                    <div className="flex justify-between items-end">
-                                        <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.4em]">
-                                            Acquisition Progress to <span className="text-white">Elite Tier 2</span>
-                                        </p>
-                                        <span className="text-[9px] font-black text-acid-green">32.8%</span>
-                                    </div>
-                                    <div className="relative h-1.5 w-full bg-white/10 overflow-hidden">
-                                        <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "32.8%" }}
-                                            transition={{ duration: 2, ease: "circOut" }}
-                                            className="absolute inset-y-0 left-0 bg-acid-green"
-                                        />
-                                    </div>
-                                </div>
+                                <p className="text-sm text-gray-500 leading-relaxed">
+                                    From your dashboard you can view your <Link href="/account/orders" className="text-black underline font-bold underline-offset-4">recent orders</Link>, manage your <Link href="/account/addresses" className="text-black underline font-bold underline-offset-4">shipping addresses</Link>, and edit your <Link href="/account/settings" className="text-black underline font-bold underline-offset-4">account details</Link>.
+                                </p>
                             </div>
+                        </section>
 
-                            {/* Decorative Technical Logo */}
-                            <div className="absolute top-12 right-12 z-10 flex flex-col items-end gap-1">
-                                <span className="text-3xl font-black italic tracking-tighter text-white">FS<span className="text-acid-green">X</span></span>
-                                <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em]">Protocol_v2.0</span>
-                            </div>
+                        {/* QUICK ACTIONS */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {quickActions.map((action, i) => (
+                                <Link
+                                    key={i}
+                                    href={action.href}
+                                    className="bg-white border border-gray-100 p-8 flex flex-col items-center text-center space-y-6 group hover:border-black transition-all duration-300 shadow-sm hover:shadow-md"
+                                >
+                                    <div className="w-16 h-16 bg-gray-50 flex items-center justify-center transition-all duration-300 group-hover:bg-black group-hover:text-white rounded-full">
+                                        <action.icon className="w-6 h-6" strokeWidth={1.5} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-xs font-bold uppercase tracking-[0.1em]">{action.title}</h3>
+                                        <p className="text-[11px] text-gray-400 font-medium leading-relaxed">{action.desc}</p>
+                                    </div>
+                                </Link>
+                            ))}
                         </div>
 
-                        {/* ACTION GRID */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {actionCards.map((card, i) => {
-                                const CardWrapper = card.href ? Link : motion.div
-                                return (
-                                    <CardWrapper
-                                        key={i}
-                                        {...(card.href ? { href: card.href } : {})}
-                                        whileHover={{ y: -8, scale: 1.02 }}
-                                        className="p-12 bg-white border border-gray-100 flex flex-col items-center text-center space-y-6 group cursor-pointer hover:border-black hover:shadow-[16px_16px_0px_rgba(0,0,0,0.05)] transition-all duration-500"
-                                    >
-                                        <div className="w-20 h-20 bg-gray-50 flex items-center justify-center transition-all duration-700 group-hover:bg-black group-hover:text-acid-green group-hover:rotate-12">
-                                            <card.icon className="w-10 h-10" strokeWidth={1} />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h3 className="text-sm font-black uppercase tracking-[0.3em]">{card.title}</h3>
-                                            <p className="text-[11px] text-gray-400 font-medium leading-relaxed max-w-[200px]">{card.desc}</p>
-                                        </div>
-                                    </CardWrapper>
-                                )
-                            })}
-                        </div>
-
-                        {/* DATA SUMMARY / STATUS */}
-                        <div className="p-12 bg-gray-50 border border-gray-100">
-                            <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-                                <div className="space-y-1 text-center md:text-left">
-                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">Identity_Reference</p>
-                                    <p className="text-sm font-bold tracking-tight">{user.email}</p>
+                        {/* ACCOUNT STATUS INFO */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="bg-white border border-gray-100 p-8 shadow-sm flex items-center gap-6">
+                                <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-sm">
+                                    <User className="w-5 h-5 text-gray-400" />
                                 </div>
-                                <div className="h-px w-24 bg-gray-200 hidden md:block" />
-                                <div className="space-y-1 text-center md:text-right">
-                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">Session_Integrity</p>
-                                    <p className="text-sm font-bold tracking-tight text-acid-green">Verified_Encrypted</p>
+                                <div className="overflow-hidden">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email Address</p>
+                                    <p className="text-sm font-semibold truncate">{user.email}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white border border-gray-100 p-8 shadow-sm flex items-center gap-6">
+                                <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-sm">
+                                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                </div>
+                                <div className="overflow-hidden">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Phone Number</p>
+                                    <p className="text-sm font-semibold truncate">{profile?.phone || "Not Set"}</p>
+                                </div>
+                            </div>
+                            <div className="bg-white border border-gray-100 p-8 shadow-sm flex items-center gap-6">
+                                <div className="w-12 h-12 bg-gray-50 flex items-center justify-center rounded-sm text-green-600">
+                                    <ShieldCheck className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Account Security</p>
+                                    <p className="text-sm font-semibold text-green-600">Verified & Secure</p>
                                 </div>
                             </div>
                         </div>

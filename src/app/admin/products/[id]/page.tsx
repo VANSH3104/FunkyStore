@@ -20,7 +20,10 @@ import {
     FolderPlus,
     Loader2,
     Search,
-    Save
+    Save,
+    Truck,
+    Info,
+    FileText
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -47,9 +50,6 @@ export default function AdminEditProductPage() {
     const { toast } = useToast()
     const utils = api.useUtils()
 
-    const { data: product, isLoading: productLoading } = api.admin.getProductById.useQuery({ id })
-    const { data: categories } = api.product.getCategories.useQuery()
-
     // Form state
     const [name, setName] = React.useState("")
     const [description, setDescription] = React.useState("")
@@ -61,6 +61,9 @@ export default function AdminEditProductPage() {
     const [tags, setTags] = React.useState("")
     const [metaTitle, setMetaTitle] = React.useState("")
     const [metaDescription, setMetaDescription] = React.useState("")
+    const [productInfo, setProductInfo] = React.useState("")
+    const [shippingReturns, setShippingReturns] = React.useState("")
+    const [additionalInfo, setAdditionalInfo] = React.useState("")
     const [imageUrls, setImageUrls] = React.useState<string[]>([])
     const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>([])
 
@@ -69,20 +72,31 @@ export default function AdminEditProductPage() {
     const [isUploading, setIsUploading] = React.useState(false)
     const [isAddingCategory, setIsAddingCategory] = React.useState(false)
     const [newCategoryName, setNewCategoryName] = React.useState("")
+    const isInitialized = React.useRef(false)
+
+    // Memoize query input to prevent re-renders from triggering re-fetches
+    const queryInput = React.useMemo(() => ({ id }), [id])
+    const { data: product, isLoading: productLoading } = api.admin.getProductById.useQuery(queryInput)
+    const { data: categories } = api.product.getCategories.useQuery()
 
     // Initialize state when product data arrives
     React.useEffect(() => {
-        if (product) {
-            setName(product.name)
-            setDescription(product.description)
-            setPrice(product.price.toString())
+        if (product && !isInitialized.current) {
+            isInitialized.current = true
+
+            setName(product.name || "")
+            setDescription(product.description || "")
+            setPrice(product.price?.toString() || "")
             setCompareAtPrice(product.compareAtPrice?.toString() || "")
-            setSku(product.sku)
-            setQuantity(product.quantity.toString())
-            setStatus(product.status as any)
+            setSku(product.sku || "")
+            setQuantity(product.quantity?.toString() || "0")
+            setStatus(product.status as any || "ACTIVE")
             setTags(product.tags?.map(t => t.name).join(", ") || "")
             setMetaTitle(product.metaTitle || "")
             setMetaDescription(product.metaDescription || "")
+            setProductInfo(product.productInfo || "")
+            setShippingReturns(product.shippingReturns || "")
+            setAdditionalInfo(product.additionalInfo || "")
             setImageUrls(product.images?.map(img => img.url) || [])
             setSelectedCategoryIds(product.categories?.map(cat => cat.id) || [])
         }
@@ -130,6 +144,7 @@ export default function AdminEditProductPage() {
         }
     })
 
+    // Handle multiple file uploads
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files
         if (!files || files.length === 0) return
@@ -147,9 +162,18 @@ export default function AdminEditProductPage() {
             })
             const data = await res.json()
             if (data.urls) {
-                const newUrls = data.urls
-                setImageUrls(prev => [...prev, ...newUrls])
-                setActiveImageIndex(imageUrls.length)
+                const newUrls: string[] = data.urls
+                setImageUrls(prev => {
+                    const next = [...prev, ...newUrls]
+                    // Set active index to the first new image
+                    setActiveImageIndex(prev.length)
+                    return next
+                })
+                
+                toast({
+                    title: "UPLOAD SUCCESS",
+                    description: `${newUrls.length} assets successfully transmitted.`,
+                })
             }
         } catch (err) {
             toast({
@@ -159,28 +183,51 @@ export default function AdminEditProductPage() {
             })
         } finally {
             setIsUploading(false)
+            e.target.value = ""
         }
     }
 
-    const handleAddImageField = () => {
-        setImageUrls([...imageUrls, ""])
-        setActiveImageIndex(imageUrls.length)
+    // Handle adding multiple URL fields
+    const handleAddMultipleUrlFields = () => {
+        setImageUrls(prev => {
+            const next = [...prev, "", "", ""] // Add 3 empty fields at once
+            setActiveImageIndex(prev.length)
+            return next
+        })
     }
 
+    // Handle adding single URL field
+    const handleAddImageField = () => {
+        setImageUrls(prev => {
+            const next = [...prev, ""]
+            setActiveImageIndex(prev.length)
+            return next
+        })
+    }
+
+    // Handle removing image
     const handleRemoveImageField = (index: number) => {
         const newUrls = imageUrls.filter((_, i) => i !== index)
         setImageUrls(newUrls)
-        if (activeImageIndex >= newUrls.length && newUrls.length > 0) {
-            setActiveImageIndex(newUrls.length - 1)
-        } else if (newUrls.length === 0) {
-            setActiveImageIndex(0)
-        }
+        setActiveImageIndex(current => {
+            if (newUrls.length === 0) return 0
+            if (current >= newUrls.length) return newUrls.length - 1
+            return current
+        })
+    }
+
+    // Handle clearing all images
+    const handleClearAllImages = () => {
+        setImageUrls([])
+        setActiveImageIndex(0)
     }
 
     const handleImageUrlChange = (index: number, value: string) => {
-        const newUrls = [...imageUrls]
-        newUrls[index] = value
-        setImageUrls(newUrls)
+        setImageUrls(prev => {
+            const newUrls = [...prev]
+            newUrls[index] = value
+            return newUrls
+        })
     }
 
     const generateSku = () => {
@@ -188,9 +235,18 @@ export default function AdminEditProductPage() {
         setSku(`LX-${random}`)
     }
 
+    // Handle status change without infinite loop
+    const handleStatusChange = (v: "ACTIVE" | "DRAFT" | "ARCHIVED") => {
+        if (status !== v) {
+            setStatus(v)
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const finalImageUrls = imageUrls.filter(url => url.trim() !== "" && (url.startsWith("http") || url.startsWith("/uploads")))
+        const finalImageUrls = imageUrls.filter(
+            url => url.trim() !== "" && (url.startsWith("http") || url.startsWith("/uploads") || url.startsWith("https"))
+        )
 
         updateProduct.mutate({
             id,
@@ -206,6 +262,9 @@ export default function AdminEditProductPage() {
             tags,
             metaTitle,
             metaDescription,
+            productInfo,
+            shippingReturns,
+            additionalInfo,
         })
     }
 
@@ -247,9 +306,7 @@ export default function AdminEditProductPage() {
                 </header>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                    {/* Left Column: Core Data */}
                     <div className="lg:col-span-8 space-y-16">
-                        {/* Primary Identity Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white relative overflow-hidden group hover:border-black transition-all duration-500">
                             <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
                                 <Package className="w-48 h-48" />
@@ -302,13 +359,55 @@ export default function AdminEditProductPage() {
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Describe the aesthetic, material composition, and silhouette..."
-                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[300px] font-medium placeholder:text-gray-200 transition-all leading-relaxed text-sm p-8"
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[250px] font-medium placeholder:text-gray-200 transition-all leading-relaxed text-sm p-8"
                                     />
                                 </div>
                             </div>
                         </section>
 
-                        {/* Value & Inventory Section */}
+                        {/* Extended Details */}
+                        <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
+                            <div className="flex items-center gap-5">
+                                <FileText className="w-5 h-5 text-gray-300" />
+                                <h2 className="text-xl font-black uppercase tracking-tight">Extended Details</h2>
+                            </div>
+
+                            <div className="space-y-10">
+                                <div className="space-y-3">
+                                    <Label htmlFor="productInfo" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Composition & Care</Label>
+                                    <Textarea
+                                        id="productInfo"
+                                        value={productInfo}
+                                        onChange={(e) => setProductInfo(e.target.value)}
+                                        placeholder="Material specs, wash instructions, fabric weight..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label htmlFor="shippingReturns" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Logistics Policy</Label>
+                                    <Textarea
+                                        id="shippingReturns"
+                                        value={shippingReturns}
+                                        onChange={(e) => setShippingReturns(e.target.value)}
+                                        placeholder="Shipping timelines, return window, global delivery notes..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label htmlFor="additionalInfo" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Archive Notes</Label>
+                                    <Textarea
+                                        id="additionalInfo"
+                                        value={additionalInfo}
+                                        onChange={(e) => setAdditionalInfo(e.target.value)}
+                                        placeholder="Styling tips, limited edition details, brand story snippets..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                                 <div className="flex items-center gap-5">
@@ -317,7 +416,14 @@ export default function AdminEditProductPage() {
 
                                 <div className="grid grid-cols-1 gap-8">
                                     <div className="space-y-3">
-                                        <Label htmlFor="price" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Listing Price (INR)</Label>
+                                        <div className="flex justify-between items-end mb-1">
+                                            <Label htmlFor="price" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Listing Price (INR)</Label>
+                                            {(Number(compareAtPrice) > 0 && Number(price) > 0 && Number(compareAtPrice) > Number(price)) && (
+                                                <span className="text-[10px] font-black text-red-500 uppercase tracking-widest animate-pulse">
+                                                    -{Math.round(((Number(compareAtPrice) - Number(price)) / Number(compareAtPrice)) * 100)}% Discount
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="relative">
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black">₹</span>
                                             <Input
@@ -395,15 +501,15 @@ export default function AdminEditProductPage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Visuals & Meta */}
+                    {/* Right Column - Enhanced Image Upload Section */}
                     <div className="lg:col-span-4 space-y-16">
-                        {/* Visual Preview Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white flex flex-col hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <Eye className="w-5 h-5 text-gray-300" />
                                 <h2 className="text-xl font-black uppercase tracking-tight">Visual Stream</h2>
                             </div>
 
+                            {/* Main Preview */}
                             <div className="aspect-[3/4] relative bg-gray-50 border border-gray-100 overflow-hidden group mb-6">
                                 <AnimatePresence mode="wait">
                                     {imageUrls[activeImageIndex] ? (
@@ -419,6 +525,8 @@ export default function AdminEditProductPage() {
                                                 alt={`Preview ${activeImageIndex + 1}`}
                                                 fill
                                                 className="object-cover"
+                                                quality={100}
+                                                priority
                                             />
                                         </motion.div>
                                     ) : (
@@ -433,7 +541,10 @@ export default function AdminEditProductPage() {
 
                                 {isUploading && (
                                     <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-20">
-                                        <Loader2 className="w-10 h-10 text-black animate-spin" />
+                                        <div className="flex flex-col items-center gap-4">
+                                            <Loader2 className="w-10 h-10 text-black animate-spin" />
+                                            <p className="text-[9px] font-black uppercase tracking-widest">Uploading Multiple Assets...</p>
+                                        </div>
                                     </div>
                                 )}
 
@@ -448,7 +559,7 @@ export default function AdminEditProductPage() {
                                             size="icon"
                                             className="h-8 w-8 rounded-none border border-gray-100 hover:bg-black hover:text-white transition-all"
                                             onClick={() => setActiveImageIndex(prev => Math.max(0, prev - 1))}
-                                            disabled={activeImageIndex === 0}
+                                            disabled={activeImageIndex === 0 || imageUrls.length === 0}
                                         >
                                             <ChevronLeft className="w-4 h-4" />
                                         </Button>
@@ -458,7 +569,7 @@ export default function AdminEditProductPage() {
                                             size="icon"
                                             className="h-8 w-8 rounded-none border border-gray-100 hover:bg-black hover:text-white transition-all"
                                             onClick={() => setActiveImageIndex(prev => Math.min(imageUrls.length - 1, prev + 1))}
-                                            disabled={activeImageIndex === imageUrls.length - 1}
+                                            disabled={activeImageIndex === imageUrls.length - 1 || imageUrls.length === 0}
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </Button>
@@ -466,51 +577,118 @@ export default function AdminEditProductPage() {
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
-                                {imageUrls.map((url, i) => (
-                                    <div
-                                        key={i}
-                                        onClick={() => setActiveImageIndex(i)}
-                                        className={cn(
-                                            "w-14 h-20 border flex-shrink-0 transition-all overflow-hidden relative cursor-pointer",
-                                            activeImageIndex === i ? "border-black scale-105 z-10" : "border-gray-100 opacity-40 grayscale hover:opacity-100 hover:grayscale-0"
-                                        )}
-                                    >
-                                        <Image src={url} alt="" fill className="object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); handleRemoveImageField(i); }}
-                                            className="absolute top-0 right-0 p-1 bg-black text-white hover:bg-red-500 opacity-0 group-hover/thumb:opacity-100 transition-opacity z-10"
+                            {/* Thumbnail Grid and Upload Controls */}
+                            <div className="space-y-6">
+                                {/* Thumbnail Strip */}
+                                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide min-h-[100px]">
+                                    {imageUrls.map((url, i) => (
+                                        <div
+                                            key={i}
+                                            onClick={() => setActiveImageIndex(i)}
+                                            className={cn(
+                                                "w-14 h-20 border flex-shrink-0 transition-all overflow-hidden relative cursor-pointer group/thumb",
+                                                activeImageIndex === i ? "border-black scale-105 z-10" : "border-gray-100 opacity-40 grayscale hover:opacity-100 hover:grayscale-0"
+                                            )}
                                         >
-                                            <X className="w-3 h-3" />
-                                        </button>
+                                            {url && (
+                                                <Image
+                                                    src={url}
+                                                    alt=""
+                                                    fill
+                                                    className="object-cover"
+                                                    quality={60}
+                                                />
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={(e) => { e.stopPropagation(); handleRemoveImageField(i); }}
+                                                className="absolute top-0 right-0 p-1 bg-black text-white hover:bg-red-500 opacity-0 group-hover/thumb:opacity-100 transition-opacity z-10"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Upload Controls */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* Multiple File Upload */}
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            id="multi-upload"
+                                            className="hidden"
+                                            multiple
+                                            accept="image/*"
+                                            onChange={handleFileUpload}
+                                            disabled={isUploading}
+                                        />
+                                        <label
+                                            htmlFor="multi-upload"
+                                            className={cn(
+                                                "flex flex-col items-center justify-center gap-2 p-4 border border-gray-200 cursor-pointer transition-all hover:border-black text-center",
+                                                isUploading && "opacity-50 pointer-events-none"
+                                            )}
+                                        >
+                                            <Upload className="w-5 h-5" />
+                                            <span className="text-[8px] font-black uppercase tracking-widest">Upload Multiple</span>
+                                            <span className="text-[6px] text-gray-400">Select several files</span>
+                                        </label>
                                     </div>
-                                ))}
 
-                                <label className="w-14 h-20 flex-shrink-0 border border-dashed border-gray-200 rounded-none hover:border-black transition-colors cursor-pointer flex flex-col items-center justify-center group/upload">
-                                    <Upload className="w-5 h-5 text-gray-300 group-hover/upload:text-black transition-colors" />
-                                    <span className="text-[7px] font-black uppercase mt-1 text-gray-300 group-hover/upload:text-black">PC</span>
-                                    <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileUpload} />
-                                </label>
+                                    {/* Add Multiple URL Fields */}
+                                    <Button
+                                        type="button"
+                                        onClick={handleAddMultipleUrlFields}
+                                        variant="outline"
+                                        className="flex flex-col items-center justify-center gap-2 p-4 border border-gray-200 hover:border-black h-auto"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest">Add 3 URLs</span>
+                                        <span className="text-[6px] text-gray-400">Bulk URL entry</span>
+                                    </Button>
+                                </div>
 
-                                <Button
-                                    type="button"
-                                    onClick={handleAddImageField}
-                                    variant="outline"
-                                    className="w-14 h-20 flex-shrink-0 border border-dashed border-gray-200 rounded-none hover:border-black p-0"
-                                >
-                                    <Plus className="w-5 h-5" />
-                                </Button>
+                                {/* Secondary Controls */}
+                                <div className="flex gap-3">
+                                    {/* Single URL Field */}
+                                    <Button
+                                        type="button"
+                                        onClick={handleAddImageField}
+                                        variant="outline"
+                                        className="flex-1 border border-gray-200 rounded-none hover:border-black text-[9px] font-black uppercase tracking-widest"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Add Single URL
+                                    </Button>
+
+                                    {/* Clear All */}
+                                    {imageUrls.length > 0 && (
+                                        <Button
+                                            type="button"
+                                            onClick={handleClearAllImages}
+                                            variant="outline"
+                                            className="border border-gray-200 rounded-none hover:border-red-500 hover:text-red-500 text-[9px] font-black uppercase tracking-widest"
+                                        >
+                                            <X className="w-4 h-4 mr-2" />
+                                            Clear All
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="space-y-5">
-                                <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Links</Label>
-                                <div className="space-y-4">
+                            {/* URL Inputs */}
+                            <div className="space-y-5 mt-6">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400">Asset Links</Label>
+                                    <span className="text-[8px] text-gray-400">{imageUrls.filter(url => url.trim() !== "").length} valid / {imageUrls.length} total</span>
+                                </div>
+                                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-hide">
                                     {imageUrls.map((url, index) => (
                                         <div key={index} className="flex gap-2">
                                             <Input
                                                 type="text"
-                                                placeholder="HTTPS://..."
+                                                placeholder={`Asset URL ${index + 1}`}
                                                 value={url}
                                                 onChange={(e) => handleImageUrlChange(index, e.target.value)}
                                                 onFocus={() => setActiveImageIndex(index)}
@@ -533,7 +711,6 @@ export default function AdminEditProductPage() {
                             </div>
                         </section>
 
-                        {/* SEO Configuration Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <Search className="w-5 h-5 text-gray-300" />
@@ -565,7 +742,6 @@ export default function AdminEditProductPage() {
                             </div>
                         </section>
 
-                        {/* Status & Category */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <TagIcon className="w-5 h-5 text-gray-300" />
@@ -614,7 +790,7 @@ export default function AdminEditProductPage() {
                                             className="w-full border border-dashed border-gray-200 rounded-none h-14 text-[9px] font-black uppercase tracking-widest hover:border-black hover:text-black transition-all"
                                             onClick={() => setIsAddingCategory(true)}
                                         >
-                                            <Plus className="w-4 h-4 mr-3" /> New Class
+                                            <FolderPlus className="w-4 h-4 mr-3" /> New Class
                                         </Button>
                                     ) : (
                                         <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-400">
@@ -632,6 +808,11 @@ export default function AdminEditProductPage() {
                                                     disabled={!newCategoryName || createCategory.isPending}
                                                     onClick={() => createCategory.mutate({ name: newCategoryName })}
                                                 >
+                                                    {createCategory.isPending ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                                    ) : (
+                                                        <FolderPlus className="w-4 h-4 mr-2" />
+                                                    )}
                                                     Deploy Class
                                                 </Button>
                                                 <Button
@@ -647,20 +828,32 @@ export default function AdminEditProductPage() {
                                     )}
                                 </div>
 
+                                {/* Status Selection - Fixed */}
                                 <div className="space-y-4 pt-10 border-t border-gray-50">
                                     <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Lifecycle Status</Label>
-                                    <Select value={status} onValueChange={(v: "ACTIVE" | "DRAFT" | "ARCHIVED") => {
-                                        if (v !== status) setStatus(v);
-                                    }}>
-                                        <SelectTrigger className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase text-[10px] tracking-widest">
-                                            <SelectValue placeholder="Select Status" />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-white border-gray-100 rounded-none">
-                                            <SelectItem value="ACTIVE" className="uppercase font-black text-[9px] tracking-widest text-black">Live Deployment</SelectItem>
-                                            <SelectItem value="DRAFT" className="uppercase font-black text-[9px] tracking-widest text-gray-400">Sandbox Draft</SelectItem>
-                                            <SelectItem value="ARCHIVED" className="uppercase font-black text-[9px] tracking-widest text-red-500">Archived Record</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {(["ACTIVE", "DRAFT", "ARCHIVED"] as const).map((option) => (
+                                            <button
+                                                key={option}
+                                                type="button"
+                                                onClick={() => handleStatusChange(option)}
+                                                className={cn(
+                                                    "p-4 border transition-all text-[9px] font-black uppercase tracking-widest",
+                                                    status === option
+                                                        ? option === "ACTIVE"
+                                                            ? "border-black bg-black text-white"
+                                                            : option === "DRAFT"
+                                                            ? "border-gray-400 bg-gray-400 text-white"
+                                                            : "border-red-500 bg-red-500 text-white"
+                                                        : "border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200"
+                                                )}
+                                            >
+                                                {option === "ACTIVE" && "Live"}
+                                                {option === "DRAFT" && "Draft"}
+                                                {option === "ARCHIVED" && "Archive"}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4">
@@ -672,6 +865,7 @@ export default function AdminEditProductPage() {
                                         placeholder="MINIMAL, PREMIUM, LUXURY"
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all text-[10px] tracking-widest"
                                     />
+                                    <p className="text-[7px] text-gray-400 tracking-wider mt-1">Separate with commas</p>
                                 </div>
                             </div>
                         </section>

@@ -27,7 +27,7 @@ export default function AdminCustomersPage() {
             <aside className="w-64 border-r-4 border-black bg-charcoal hidden lg:flex flex-col">
                 <div className="p-8 border-b-4 border-black">
                     <span className="text-2xl font-black uppercase italic tracking-tighter">
-                        ADM <span className="text-neon-green">/ HUB</span>
+                        ADMIN <span className="text-gray-400">DASHBOARD</span>
                     </span>
                 </div>
                 <nav className="p-4 flex-grow space-y-2">
@@ -42,7 +42,7 @@ export default function AdminCustomersPage() {
                                 variant="ghost"
                                 className={cn(
                                     "w-full justify-start rounded-none h-14 font-black uppercase italic tracking-widest gap-4 px-4 border-2",
-                                    item.active ? "border-neon-green bg-black text-white" : "border-transparent text-muted-foreground hover:text-white"
+                                    item.active ? "border-black bg-black text-white" : "border-transparent text-muted-foreground hover:text-white"
                                 )}
                             >
                                 {item.name}
@@ -57,10 +57,10 @@ export default function AdminCustomersPage() {
                     <div className="space-y-4">
                         <Link href="/admin" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-white transition-colors">
                             <ArrowLeft className="w-3 h-3" />
-                            Back to Command Center
+                            Back to Dashboard
                         </Link>
                         <h1 className="text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-none">
-                            OPERATIVE <span className="text-neon-green">/ LOGS</span>
+                            CUSTOMER <span className="text-gray-400">RECORDS</span>
                         </h1>
                     </div>
                 </header>
@@ -68,8 +68,8 @@ export default function AdminCustomersPage() {
                 <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
-                        placeholder="FILTER BY OPERATIVE DESIGNATION OR EMAIL..."
-                        className="bg-charcoal border-2 border-black focus:border-neon-green rounded-none h-14 pl-12 font-bold uppercase italic tracking-widest"
+                        placeholder="SEARCH CUSTOMERS BY NAME OR EMAIL..."
+                        className="bg-charcoal border-2 border-black focus:border-white rounded-none h-14 pl-12 font-bold uppercase italic tracking-widest"
                     />
                 </div>
 
@@ -77,16 +77,16 @@ export default function AdminCustomersPage() {
                     <table className="w-full text-left border-collapse min-w-[900px]">
                         <thead>
                             <tr className="bg-black text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground border-b-2 border-black">
-                                <th className="p-6">OPERATIVE</th>
-                                <th className="p-6">ACCESS STATUS</th>
+                                <th className="p-6">CUSTOMER</th>
+                                <th className="p-6">ROLE</th>
                                 <th className="p-6">JOIN DATE</th>
-                                <th className="p-6">DEPLOYMENTS</th>
+                                <th className="p-6">TOTAL ORDERS</th>
                                 <th className="p-6">ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
                             {isLoading ? (
-                                <tr><td colSpan={5} className="p-24 text-center font-black uppercase italic animate-pulse">Syncing Operative Database...</td></tr>
+                                <tr><td colSpan={5} className="p-24 text-center font-black uppercase italic animate-pulse">Syncing Customer Database...</td></tr>
                             ) : users?.map((user: any) => (
                                 <tr key={user.id} className="border-b-2 border-black/20 hover:bg-black/20 transition-colors group">
                                     <td className="p-6">
@@ -99,7 +99,7 @@ export default function AdminCustomersPage() {
                                                 )}
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-black uppercase italic tracking-tight group-hover:text-neon-green transition-colors">{user.name || "UNIDENTIFIED"}</span>
+                                                <span className="font-black uppercase italic tracking-tight group-hover:text-white transition-colors">{user.name || "UNKNOWN USER"}</span>
                                                 <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                                                     <Mail className="w-2 h-2" /> {user.email}
                                                 </span>
@@ -109,9 +109,9 @@ export default function AdminCustomersPage() {
                                     <td className="p-6">
                                         <div className={cn(
                                             "px-3 py-1 text-[8px] font-black uppercase border w-fit",
-                                            user.role === "ADMIN" ? "border-electric-pink text-electric-pink bg-electric-pink/10" : "border-white/20 text-white"
+                                            user.role === "ADMIN" ? "border-gray-400 text-white bg-white/10" : "border-white/20 text-white"
                                         )}>
-                                            {user.role} ACCESS
+                                            {user.role}
                                         </div>
                                     </td>
                                     <td className="p-6 font-bold text-xs uppercase tracking-widest text-muted-foreground">
@@ -122,7 +122,7 @@ export default function AdminCustomersPage() {
                                     </td>
                                     <td className="p-6">
                                         <div className="flex items-center gap-2 font-black tabular-nums">
-                                            <ShoppingBag className="w-4 h-4 text-cyber-blue" />
+                                            <ShoppingBag className="w-4 h-4 text-white" />
                                             {user.orders.length}
                                         </div>
                                     </td>
@@ -131,7 +131,7 @@ export default function AdminCustomersPage() {
                                             <Button variant="outline" className="border-2 border-white/20 rounded-none h-10 w-10 p-0 hover:border-white">
                                                 <Shield className="w-4 h-4" />
                                             </Button>
-                                            <Button variant="ghost" className="rounded-none h-10 w-10 p-0 hover:text-neon-green">
+                                            <Button variant="ghost" className="rounded-none h-10 w-10 p-0 hover:text-white">
                                                 <MoreHorizontal className="w-5 h-5" />
                                             </Button>
                                         </div>

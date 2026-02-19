@@ -130,10 +130,40 @@ export const accountRouter = createTRPCRouter({
             })
         }),
 
+    updateAddress: publicProcedure
+        .input(z.object({
+            id: z.string(),
+            street: z.string().optional(),
+            city: z.string().optional(),
+            state: z.string().optional(),
+            zip: z.string().optional(),
+            country: z.string().optional(),
+            isDefault: z.boolean().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const session = await getServerSession(authOptions)
+            if (!session?.user) throw new TRPCError({ code: "UNAUTHORIZED" })
+
+            const { id, ...data } = input
+
+            if (data.isDefault) {
+                await ctx.db.address.updateMany({
+                    where: { userId: session.user.id },
+                    data: { isDefault: false }
+                })
+            }
+
+            return ctx.db.address.update({
+                where: { id, userId: session.user.id },
+                data
+            })
+        }),
+
     updateProfile: publicProcedure
         .input(z.object({
             name: z.string().optional(),
             image: z.string().optional(),
+            phone: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
             const session = await getServerSession(authOptions)

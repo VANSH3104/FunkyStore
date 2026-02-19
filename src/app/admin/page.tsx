@@ -57,7 +57,7 @@ export default function AdminDashboard() {
                                 className={cn(
                                     "w-full justify-start rounded-none h-14 font-black uppercase tracking-widest gap-4 px-6 transition-all duration-300",
                                     item.active
-                                        ? "bg-acid-green text-black hover:bg-acid-green hover:text-black shadow-[4px_4px_0px_rgba(0,0,0,1)]"
+                                        ? "bg-black text-white hover:bg-black/90 hover:text-white shadow-[4px_4px_0px_rgba(0,0,0,0.1)]"
                                         : "text-gray-400 hover:text-black hover:bg-gray-50 transition-all duration-300"
                                 )}
                             >
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                     <div className="space-y-3">
                         <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
-                            COMMAND <span className="text-gray-200">CENTER</span>
+                            DASHBOARD <span className="text-gray-200">OVERVIEW</span>
                         </h1>
                         <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
                             Real-time Store Performance Metrics
@@ -97,8 +97,8 @@ export default function AdminDashboard() {
                             <Bell className="w-4 h-4" />
                         </Button>
                         <Link href="/admin/products/new">
-                            <Button className="rounded-none bg-acid-green text-black h-12 px-8 text-[10px] font-black uppercase tracking-widest hover:translate-x-1 hover:-translate-y-1 transition-all shadow-[4px_4px_0px_#000] hover:shadow-none border-2 border-black">
-                                New Entry
+                            <Button className="rounded-none bg-black text-white h-12 px-8 text-[10px] font-black uppercase tracking-widest hover:bg-gray-900 transition-all shadow-[4px_4px_0px_rgba(0,0,0,0.1)] hover:shadow-none border border-black">
+                                New Item
                             </Button>
                         </Link>
                     </div>
@@ -111,12 +111,12 @@ export default function AdminDashboard() {
                             <div className="absolute top-0 right-0 w-2 h-0 bg-black group-hover:h-full transition-all duration-700" />
                             <div className="relative space-y-8">
                                 <div className="flex justify-between items-center">
-                                    <div className="w-10 h-10 bg-gray-50 flex items-center justify-center group-hover:bg-acid-green transition-colors duration-500">
-                                        <card.icon className="w-4 h-4 text-black group-hover:text-black transition-colors duration-500" />
+                                    <div className="w-10 h-10 bg-gray-50 flex items-center justify-center group-hover:bg-black transition-colors duration-500">
+                                        <card.icon className="w-4 h-4 text-black group-hover:text-white transition-colors duration-500" />
                                     </div>
                                     <div className={cn(
                                         "text-[8px] font-black uppercase tracking-widest px-2 py-1",
-                                        card.positive ? "bg-acid-green text-black" : "bg-gray-100 text-black border border-gray-200"
+                                        card.positive ? "bg-black text-white" : "bg-gray-100 text-black border border-gray-200"
                                     )}>
                                         {card.positive ? "+12.5%" : "Action Required"}
                                     </div>
@@ -137,20 +137,20 @@ export default function AdminDashboard() {
                     <div className="lg:col-span-2 space-y-10">
                         <div className="flex justify-between items-end border-b border-gray-100 pb-6">
                             <div>
-                                <h2 className="text-3xl font-black uppercase tracking-tight">Recent Manifests</h2>
-                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Latest Order Stream</p>
+                                <h2 className="text-3xl font-black uppercase tracking-tight">Recent Orders</h2>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Latest Store Activity</p>
                             </div>
                             <Link href="/admin/orders">
                                 <Button variant="link" className="text-black font-black uppercase text-[10px] tracking-widest hover:no-underline flex items-center gap-2 group p-0">
-                                    Full Ledger <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                                    All Orders <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                 </Button>
                             </Link>
                         </div>
                         <div className="space-y-1 border border-gray-50 p-2">
                             {ordersLoading ? (
-                                <div className="py-24 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 animate-pulse">Syncing Encrypted Streams...</div>
+                                <div className="py-24 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 animate-pulse">Synchronizing Data...</div>
                             ) : orders?.length === 0 ? (
-                                <div className="py-24 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">No active manifests found.</div>
+                                <div className="py-24 text-center text-[10px] font-black uppercase tracking-[0.4em] text-gray-300">No active orders found.</div>
                             ) : orders?.slice(0, 5).map((order) => (
                                 <div key={order.id} className="flex items-center justify-between p-6 hover:bg-gray-50 transition-all group">
                                     <div className="flex items-center gap-6">
@@ -176,8 +176,8 @@ export default function AdminDashboard() {
                     {/* Stock Equilibrium */}
                     <div className="space-y-10">
                         <div className="border-b border-gray-100 pb-6">
-                            <h2 className="text-3xl font-black uppercase tracking-tight">Equilibrium</h2>
-                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Inventory Balance</p>
+                            <h2 className="text-3xl font-black uppercase tracking-tight">Inventory</h2>
+                            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Stock Status</p>
                         </div>
                         <div className="space-y-10 p-8 border border-gray-50">
                             {isLoading ? (
@@ -192,15 +192,15 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="h-[2px] w-full bg-gray-100 overflow-hidden">
                                         <div
-                                            className="h-full bg-acid-green transition-all duration-1000 shadow-[0_0_10px_rgba(212,255,0,0.5)]"
+                                            className="h-full bg-black transition-all duration-1000"
                                             style={{ width: `${Math.max((product.quantity / 5) * 100, 10)}%` }}
                                         />
                                     </div>
                                 </div>
                             ))}
                             <Link href="/admin/products" className="block pt-4">
-                                <Button className="w-full bg-acid-green text-black border-2 border-black font-black uppercase text-[10px] tracking-widest h-14 hover:bg-black hover:text-acid-green transition-all duration-500 rounded-none shadow-[4px_4px_0px_#000]">
-                                    Restock Inventory
+                                <Button className="w-full bg-black text-white border border-black font-black uppercase text-[10px] tracking-widest h-14 hover:bg-gray-900 transition-all duration-500 rounded-none shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
+                                    Restock Items
                                 </Button>
                             </Link>
                         </div>

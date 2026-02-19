@@ -152,7 +152,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                 </button>
 
                                 <div className="space-y-4">
-                                    <h1 className="text-4xl font-black uppercase tracking-tighter text-black">THE CYPHER</h1>
+                                    <h1 className="text-4xl font-black uppercase tracking-tighter text-black">VERIFY CODE</h1>
                                     <p className="text-[10px] font-black text-gray-700 uppercase tracking-widest leading-relaxed">
                                         SENT TO <span className="text-black">{phoneNumber}</span>
                                     </p>
@@ -193,7 +193,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                 className="space-y-10"
                             >
                                 <div className="border-b border-gray-100 pb-4 mb-2">
-                                    <h1 className="text-xl font-black uppercase tracking-tight text-black leading-none">INITIALIZE SESSION</h1>
+                                    <h1 className="text-xl font-black uppercase tracking-tight text-black leading-none">SIGN IN</h1>
                                 </div>
 
                                 <div className="space-y-8">
@@ -211,7 +211,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                     {mode === "phone" ? (
                                         <form onSubmit={handlePhoneSubmit} className="space-y-8">
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">MOBILE ACCESS NODE</label>
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">PHONE NUMBER</label>
                                                 <div className="flex h-16 border-b-[3px] border-gray-100 focus-within:border-black transition-colors group">
                                                     <div className="flex items-center px-6 bg-gray-50 group-focus-within:bg-black group-focus-within:text-white transition-colors">
                                                         <span className="text-sm font-black tracking-tighter">+91</span>
@@ -230,7 +230,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                             <Button type="submit" disabled={isLoading} className="w-full h-16 bg-black text-white font-black uppercase tracking-[0.4em] rounded-none group hover:bg-black transition-all shadow-[10px_10px_0px_rgba(0,0,0,0.05)]">
                                                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                                                     <div className="flex items-center gap-3">
-                                                        INITIALIZE
+                                                        CONTINUE
                                                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                                     </div>
                                                 )}
@@ -239,7 +239,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                     ) : (
                                         <form onSubmit={handleEmailSignIn} className="space-y-8">
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">SECURE EMAIL NODE</label>
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-700 block italic">EMAIL ADDRESS</label>
                                                 <div className="h-16 border-b-[3px] border-gray-100 focus-within:border-black transition-colors">
                                                     <input
                                                         type="email"
@@ -261,7 +261,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                 <div className="space-y-6">
                                     <div className="relative flex items-center justify-center">
                                         <div className="absolute inset-x-0 h-[2px] bg-gray-50" />
-                                        <span className="relative bg-white px-6 text-[9px] font-black uppercase tracking-[0.5em] text-gray-700">OR SYNC VIA</span>
+                                        <span className="relative bg-white px-6 text-[9px] font-black uppercase tracking-[0.5em] text-gray-700">OR CONTINUE WITH</span>
                                     </div>
                                     <button
                                         type="button"
@@ -269,7 +269,7 @@ export function AuthPortal({ callbackUrl, isPopup = true }: AuthPortalProps) {
                                         className="w-full h-14 bg-white border-2 border-gray-100 flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-widest text-black hover:border-black transition-all"
                                     >
                                         <Chrome className="w-4 h-4 text-gray-700" />
-                                        GOOGLE SECURE SYNC
+                                        GOOGLE ACCESS
                                     </button>
                                 </div>
                             </motion.div>

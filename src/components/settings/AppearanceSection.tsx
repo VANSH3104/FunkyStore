@@ -14,7 +14,7 @@ export function AppearanceSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {animationsEnabled ? (
-            <Zap className="w-4 h-4 text-neon-green" />
+            <Zap className="w-4 h-4 text-white" />
           ) : (
             <ZapOff className="w-4 h-4 text-muted-foreground" />
           )}
@@ -29,7 +29,7 @@ export function AppearanceSection() {
       {/* Theme Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Sun className="w-4 h-4 text-neon-green" />
+          <Sun className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Theme</label>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -37,11 +37,10 @@ export function AppearanceSection() {
             <button
               key={t}
               onClick={() => setTheme(t)}
-              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize ${
-                theme === t
-                  ? "bg-neon-green text-black"
+              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize ${theme === t
+                  ? "bg-white text-black"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+                }`}
             >
               {t === "system" ? "Auto" : t}
             </button>
@@ -52,7 +51,7 @@ export function AppearanceSection() {
       {/* Font Size */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Type className="w-4 h-4 text-neon-green" />
+          <Type className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Font Size</label>
         </div>
         <div className="grid grid-cols-3 gap-2">
@@ -60,11 +59,10 @@ export function AppearanceSection() {
             <button
               key={size}
               onClick={() => setFontSize(size)}
-              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize ${
-                fontSize === size
-                  ? "bg-neon-green text-black"
+              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize ${fontSize === size
+                  ? "bg-white text-black"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+                }`}
             >
               {size === "small" ? "S" : size === "medium" ? "M" : "L"}
             </button>
@@ -76,7 +74,7 @@ export function AppearanceSection() {
       {/* Grid View Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Grid3x3 className="w-4 h-4 text-neon-green" />
+          <Grid3x3 className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Product Display</label>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -84,11 +82,10 @@ export function AppearanceSection() {
             <button
               key={view}
               onClick={() => setGridView(view)}
-              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize flex items-center justify-center gap-1 ${
-                gridView === view
-                  ? "bg-neon-green text-black"
+              className={`py-2 px-3 rounded text-xs font-medium transition-colors capitalize flex items-center justify-center gap-1 ${gridView === view
+                  ? "bg-white text-black"
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
+                }`}
             >
               {view === "grid" ? (
                 <>

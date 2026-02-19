@@ -17,9 +17,9 @@ import {
     Upload,
     Zap,
     Tag as TagIcon,
-    FolderPlus,
     Loader2,
-    Search
+    Search,
+    FileText
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -40,28 +40,55 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
 
+interface ProductFormData {
+    name: string
+    description: string
+    price: string
+    compareAtPrice: string
+    sku: string
+    quantity: string
+    status: "ACTIVE" | "DRAFT" | "ARCHIVED"
+    tags: string
+    metaTitle: string
+    metaDescription: string
+    productInfo: string
+    shippingReturns: string
+    additionalInfo: string
+    imageUrls: string[]
+    selectedCategoryIds: string[]
+}
+
+const INITIAL_FORM_STATE: ProductFormData = {
+    name: "",
+    description: "",
+    price: "",
+    compareAtPrice: "",
+    sku: "",
+    quantity: "0",
+    status: "ACTIVE",
+    tags: "",
+    metaTitle: "",
+    metaDescription: "",
+    productInfo: "",
+    shippingReturns: "",
+    additionalInfo: "",
+    imageUrls: [],
+    selectedCategoryIds: []
+}
+
 export default function AdminNewProductPage() {
     const router = useRouter()
     const { toast } = useToast()
     const utils = api.useUtils()
 
-    // Multi-image state
-    const [imageUrls, setImageUrls] = React.useState<string[]>([])
+    // Combined form state
+    const [formData, setFormData] = React.useState<ProductFormData>(INITIAL_FORM_STATE)
+
+    // UI Only state
     const [activeImageIndex, setActiveImageIndex] = React.useState(0)
     const [isUploading, setIsUploading] = React.useState(false)
-
-    // Category state
-    const [selectedCategoryIds, setSelectedCategoryIds] = React.useState<string[]>([])
-    const [newCategoryName, setNewCategoryName] = React.useState("")
     const [isAddingCategory, setIsAddingCategory] = React.useState(false)
-
-    // SKU state
-    const [sku, setSku] = React.useState("")
-    const [description, setDescription] = React.useState("")
-    const [status, setStatus] = React.useState<"ACTIVE" | "DRAFT" | "ARCHIVED">("ACTIVE")
-    const [name, setName] = React.useState("")
-    const [metaTitle, setMetaTitle] = React.useState("")
-    const [metaDescription, setMetaDescription] = React.useState("")
+    const [newCategoryName, setNewCategoryName] = React.useState("")
 
     const { data: categories } = api.product.getCategories.useQuery()
 
@@ -92,13 +119,16 @@ export default function AdminNewProductPage() {
             utils.product.getCategories.invalidate()
             setNewCategoryName("")
             setIsAddingCategory(false)
-            setSelectedCategoryIds(prev => [...prev, newCat.id])
+            setFormData(prev => ({
+                ...prev,
+                selectedCategoryIds: [...prev.selectedCategoryIds, newCat.id]
+            }))
         }
     })
 
     const enhanceDescription = api.admin.enhanceDescription.useMutation({
         onSuccess: (data) => {
-            setDescription(data.enhanced)
+            setFormData(prev => ({ ...prev, description: data.enhanced }))
             toast({
                 title: "CONTENT REFINED",
                 description: "AI-enhanced copy has been applied to the manifest.",
@@ -111,21 +141,24 @@ export default function AdminNewProductPage() {
         if (!files || files.length === 0) return
 
         setIsUploading(true)
-        const formData = new FormData()
+        const uploadData = new FormData()
         for (let i = 0; i < files.length; i++) {
-            formData.append("files", files[i])
+            uploadData.append("files", files[i])
         }
 
         try {
             const res = await fetch("/api/upload", {
                 method: "POST",
-                body: formData
+                body: uploadData
             })
             const data = await res.json()
             if (data.urls) {
                 const newUrls = data.urls
-                setImageUrls(prev => [...prev, ...newUrls])
-                setActiveImageIndex(imageUrls.length)
+                setFormData(prev => {
+                    const nextUrls = [...prev.imageUrls, ...newUrls]
+                    setActiveImageIndex(prev.imageUrls.length)
+                    return { ...prev, imageUrls: nextUrls }
+                })
             }
         } catch (err) {
             toast({
@@ -139,13 +172,17 @@ export default function AdminNewProductPage() {
     }
 
     const handleAddImageField = () => {
-        setImageUrls([...imageUrls, ""])
-        setActiveImageIndex(imageUrls.length)
+        setFormData(prev => {
+            const nextUrls = [...prev.imageUrls, ""]
+            setActiveImageIndex(prev.imageUrls.length)
+            return { ...prev, imageUrls: nextUrls }
+        })
     }
 
     const handleRemoveImageField = (index: number) => {
-        const newUrls = imageUrls.filter((_, i) => i !== index)
-        setImageUrls(newUrls)
+        const newUrls = formData.imageUrls.filter((_, i) => i !== index)
+        setFormData(prev => ({ ...prev, imageUrls: newUrls }))
+
         if (activeImageIndex >= newUrls.length && newUrls.length > 0) {
             setActiveImageIndex(newUrls.length - 1)
         } else if (newUrls.length === 0) {
@@ -154,35 +191,29 @@ export default function AdminNewProductPage() {
     }
 
     const handleImageUrlChange = (index: number, value: string) => {
-        const newUrls = [...imageUrls]
+        const newUrls = [...formData.imageUrls]
         newUrls[index] = value
-        setImageUrls(newUrls)
+        setFormData(prev => ({ ...prev, imageUrls: newUrls }))
     }
 
     const generateSku = () => {
         const random = Math.random().toString(36).substring(2, 9).toUpperCase()
-        setSku(`LX-${random}`)
+        setFormData(prev => ({ ...prev, sku: `LX-${random}` }))
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        const formData = new FormData(e.currentTarget)
-
-        const finalImageUrls = imageUrls.filter(url => url.trim() !== "" && (url.startsWith("http") || url.startsWith("/uploads")))
+        const finalImageUrls = formData.imageUrls.filter(url =>
+            url.trim() !== "" && (url.startsWith("http") || url.startsWith("/uploads") || url.startsWith("https") || url.startsWith("blob:"))
+        )
 
         createProduct.mutate({
-            name: name,
-            description: description,
-            price: Number(formData.get("price")),
-            compareAtPrice: formData.get("compareAtPrice") ? Number(formData.get("compareAtPrice")) : undefined,
-            quantity: Number(formData.get("quantity")),
-            sku: sku,
-            categoryIds: selectedCategoryIds,
+            ...formData,
+            price: Number(formData.price),
+            compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : undefined,
+            quantity: Number(formData.quantity),
             imageUrls: finalImageUrls,
-            status: status,
-            tags: formData.get("tags") as string,
-            metaTitle: metaTitle,
-            metaDescription: metaDescription,
+            categoryIds: formData.selectedCategoryIds,
         })
     }
 
@@ -213,9 +244,7 @@ export default function AdminNewProductPage() {
                 </header>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                    {/* Left Column: Core Data */}
                     <div className="lg:col-span-8 space-y-16">
-                        {/* Primary Identity Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white relative overflow-hidden group hover:border-black transition-all duration-500">
                             <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
                                 <Package className="w-48 h-48" />
@@ -231,10 +260,9 @@ export default function AdminNewProductPage() {
                                     <Label htmlFor="name" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Designation</Label>
                                     <Input
                                         id="name"
-                                        name="name"
                                         required
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                         placeholder="E.G. LUXECHO SILK SHIRT"
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all text-xl pr-10"
                                     />
@@ -246,8 +274,8 @@ export default function AdminNewProductPage() {
                                         <button
                                             type="button"
                                             onClick={() => {
-                                                if (name && description) {
-                                                    enhanceDescription.mutate({ name, description })
+                                                if (formData.name && formData.description) {
+                                                    enhanceDescription.mutate({ name: formData.name, description: formData.description })
                                                 } else {
                                                     toast({
                                                         title: "DATA DEFICIENCY",
@@ -265,10 +293,9 @@ export default function AdminNewProductPage() {
                                     </div>
                                     <Textarea
                                         id="description"
-                                        name="description"
                                         required
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
+                                        value={formData.description}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                         placeholder="Describe the aesthetic, material composition, and silhouette..."
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[300px] font-medium placeholder:text-gray-200 transition-all leading-relaxed text-sm p-8"
                                     />
@@ -276,7 +303,48 @@ export default function AdminNewProductPage() {
                             </div>
                         </section>
 
-                        {/* Value & Inventory Section */}
+                        <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
+                            <div className="flex items-center gap-5">
+                                <FileText className="w-5 h-5 text-gray-300" />
+                                <h2 className="text-xl font-black uppercase tracking-tight">Extended Details</h2>
+                            </div>
+
+                            <div className="space-y-10">
+                                <div className="space-y-3">
+                                    <Label htmlFor="productInfo" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Composition & Care</Label>
+                                    <Textarea
+                                        id="productInfo"
+                                        value={formData.productInfo}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, productInfo: e.target.value }))}
+                                        placeholder="Material specs, wash instructions, fabric weight..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label htmlFor="shippingReturns" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Logistics Policy</Label>
+                                    <Textarea
+                                        id="shippingReturns"
+                                        value={formData.shippingReturns}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, shippingReturns: e.target.value }))}
+                                        placeholder="Shipping timelines, return window, global delivery notes..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label htmlFor="additionalInfo" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Archive Notes</Label>
+                                    <Textarea
+                                        id="additionalInfo"
+                                        value={formData.additionalInfo}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, additionalInfo: e.target.value }))}
+                                        placeholder="Styling tips, limited edition details, brand story snippets..."
+                                        className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[150px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                                 <div className="flex items-center gap-5">
@@ -285,15 +353,23 @@ export default function AdminNewProductPage() {
 
                                 <div className="grid grid-cols-1 gap-8">
                                     <div className="space-y-3">
-                                        <Label htmlFor="price" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Listing Price (INR)</Label>
+                                        <div className="flex justify-between items-end mb-1">
+                                            <Label htmlFor="price" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Listing Price (INR)</Label>
+                                            {(Number(formData.compareAtPrice) > 0 && Number(formData.price) > 0 && Number(formData.compareAtPrice) > Number(formData.price)) && (
+                                                <span className="text-[10px] font-black text-red-500 uppercase tracking-widest animate-pulse">
+                                                    -{Math.round(((Number(formData.compareAtPrice) - Number(formData.price)) / Number(formData.compareAtPrice)) * 100)}% Discount
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="relative">
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-black">₹</span>
                                             <Input
                                                 id="price"
-                                                name="price"
                                                 type="number"
                                                 step="0.01"
                                                 required
+                                                value={formData.price}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                                                 placeholder="0.00"
                                                 className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black pl-12 transition-all tabular-nums"
                                             />
@@ -306,9 +382,10 @@ export default function AdminNewProductPage() {
                                             <span className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-gray-200">₹</span>
                                             <Input
                                                 id="compareAtPrice"
-                                                name="compareAtPrice"
                                                 type="number"
                                                 step="0.01"
+                                                value={formData.compareAtPrice}
+                                                onChange={(e) => setFormData(prev => ({ ...prev, compareAtPrice: e.target.value }))}
                                                 placeholder="Original price"
                                                 className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black pl-12 transition-all opacity-70 tabular-nums placeholder:text-gray-200"
                                             />
@@ -336,10 +413,9 @@ export default function AdminNewProductPage() {
                                         </div>
                                         <Input
                                             id="sku"
-                                            name="sku"
                                             required
-                                            value={sku}
-                                            onChange={(e) => setSku(e.target.value.toUpperCase())}
+                                            value={formData.sku}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }))}
                                             placeholder="LX-SPEC-001"
                                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all font-mono tracking-widest"
                                         />
@@ -349,9 +425,10 @@ export default function AdminNewProductPage() {
                                         <Label htmlFor="quantity" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Stock Reserve</Label>
                                         <Input
                                             id="quantity"
-                                            name="quantity"
                                             type="number"
                                             required
+                                            value={formData.quantity}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
                                             placeholder="0"
                                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black transition-all tabular-nums placeholder:text-gray-200"
                                         />
@@ -361,31 +438,30 @@ export default function AdminNewProductPage() {
                         </div>
                     </div>
 
-                    {/* Right Column: Visuals & Meta */}
                     <div className="lg:col-span-4 space-y-16">
-                        {/* Visual Preview Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white flex flex-col hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <Eye className="w-5 h-5 text-gray-300" />
                                 <h2 className="text-xl font-black uppercase tracking-tight">Visual Stream</h2>
                             </div>
 
-                            {/* main preview */}
                             <div className="aspect-[3/4] relative bg-gray-50 border border-gray-100 overflow-hidden group mb-6">
                                 <AnimatePresence mode="wait">
-                                    {imageUrls[activeImageIndex] ? (
+                                    {formData.imageUrls[activeImageIndex] ? (
                                         <motion.div
-                                            key={imageUrls[activeImageIndex]}
+                                            key={formData.imageUrls[activeImageIndex]}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
                                             className="absolute inset-0"
                                         >
                                             <Image
-                                                src={imageUrls[activeImageIndex]}
+                                                src={formData.imageUrls[activeImageIndex]}
                                                 alt={`Preview ${activeImageIndex + 1}`}
                                                 fill
                                                 className="object-cover"
+                                                quality={100}
+                                                priority
                                             />
                                         </motion.div>
                                     ) : (
@@ -406,7 +482,7 @@ export default function AdminNewProductPage() {
 
                                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-gray-50 flex justify-between items-center z-10">
                                     <p className="text-[9px] font-black uppercase tracking-widest text-black">
-                                        {imageUrls.length > 0 ? `${activeImageIndex + 1} / ${imageUrls.length}` : "No Assets"}
+                                        {formData.imageUrls.length > 0 ? `${activeImageIndex + 1} / ${formData.imageUrls.length}` : "No Assets"}
                                     </p>
                                     <div className="flex gap-2">
                                         <Button
@@ -424,8 +500,8 @@ export default function AdminNewProductPage() {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 rounded-none border border-gray-100 hover:bg-black hover:text-white transition-all"
-                                            onClick={() => setActiveImageIndex(prev => Math.min(imageUrls.length - 1, prev + 1))}
-                                            disabled={activeImageIndex === imageUrls.length - 1}
+                                            onClick={() => setActiveImageIndex(prev => Math.min(formData.imageUrls.length - 1, prev + 1))}
+                                            disabled={activeImageIndex === formData.imageUrls.length - 1}
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </Button>
@@ -433,9 +509,8 @@ export default function AdminNewProductPage() {
                                 </div>
                             </div>
 
-                            {/* thumbnail track */}
                             <div className="flex gap-3 mb-8 overflow-x-auto pb-4 scrollbar-hide">
-                                {imageUrls.map((url, i) => (
+                                {formData.imageUrls.map((url, i) => (
                                     <div
                                         key={i}
                                         onClick={() => setActiveImageIndex(i)}
@@ -444,7 +519,7 @@ export default function AdminNewProductPage() {
                                             activeImageIndex === i ? "border-black scale-105 z-10" : "border-gray-100 opacity-40 grayscale hover:opacity-100 hover:grayscale-0"
                                         )}
                                     >
-                                        <Image src={url} alt="" fill className="object-cover" />
+                                        <Image src={url} alt="" fill className="object-cover" quality={60} />
                                         <button
                                             type="button"
                                             onClick={(e) => { e.stopPropagation(); handleRemoveImageField(i); }}
@@ -474,7 +549,7 @@ export default function AdminNewProductPage() {
                             <div className="space-y-5">
                                 <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Asset Links</Label>
                                 <div className="space-y-4">
-                                    {imageUrls.map((url, index) => (
+                                    {formData.imageUrls.map((url, index) => (
                                         <div key={index} className="flex gap-2">
                                             <Input
                                                 type="text"
@@ -501,7 +576,6 @@ export default function AdminNewProductPage() {
                             </div>
                         </section>
 
-                        {/* SEO Configuration Section */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <Search className="w-5 h-5 text-gray-300" />
@@ -514,8 +588,8 @@ export default function AdminNewProductPage() {
                                     <Input
                                         id="metaTitle"
                                         placeholder="SEO Title (Recommended < 60 chars)"
-                                        value={metaTitle}
-                                        onChange={(e) => setMetaTitle(e.target.value)}
+                                        value={formData.metaTitle}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, metaTitle: e.target.value }))}
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all text-[10px] tracking-widest"
                                     />
                                 </div>
@@ -525,15 +599,14 @@ export default function AdminNewProductPage() {
                                     <Textarea
                                         id="metaDescription"
                                         placeholder="Brief summary for search engine results..."
-                                        value={metaDescription}
-                                        onChange={(e) => setMetaDescription(e.target.value)}
+                                        value={formData.metaDescription}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, metaDescription: e.target.value }))}
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none min-h-[120px] font-medium placeholder:text-gray-200 transition-all text-xs p-5"
                                     />
                                 </div>
                             </div>
                         </section>
 
-                        {/* Status & Category */}
                         <section className="space-y-10 p-10 border border-gray-50 bg-white hover:border-black transition-all duration-500">
                             <div className="flex items-center gap-5">
                                 <TagIcon className="w-5 h-5 text-gray-300" />
@@ -545,7 +618,7 @@ export default function AdminNewProductPage() {
                                     <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1 block mb-2">Category Matrix</Label>
                                     <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-2 scrollbar-hide">
                                         {categories?.map((cat) => {
-                                            const isSelected = selectedCategoryIds.includes(cat.id);
+                                            const isSelected = formData.selectedCategoryIds.includes(cat.id);
                                             return (
                                                 <div
                                                     key={cat.id}
@@ -554,9 +627,12 @@ export default function AdminNewProductPage() {
                                                         isSelected ? "border-black bg-black text-white" : "border-gray-50 bg-gray-50 text-gray-400 hover:border-gray-200"
                                                     )}
                                                     onClick={() => {
-                                                        setSelectedCategoryIds(prev =>
-                                                            prev.includes(cat.id) ? prev.filter(id => id !== cat.id) : [...prev, cat.id]
-                                                        )
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            selectedCategoryIds: prev.selectedCategoryIds.includes(cat.id)
+                                                                ? prev.selectedCategoryIds.filter(id => id !== cat.id)
+                                                                : [...prev.selectedCategoryIds, cat.id]
+                                                        }))
                                                     }}
                                                 >
                                                     <span className="text-[10px] font-black uppercase tracking-widest">{cat.name}</span>
@@ -574,7 +650,6 @@ export default function AdminNewProductPage() {
                                     </div>
                                 </div>
 
-                                {/* Quick Add Category */}
                                 <div className="pt-6 border-t border-gray-50 space-y-5">
                                     {!isAddingCategory ? (
                                         <Button
@@ -618,9 +693,12 @@ export default function AdminNewProductPage() {
 
                                 <div className="space-y-4 pt-10 border-t border-gray-50">
                                     <Label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Lifecycle Status</Label>
-                                    <Select value={status} onValueChange={(v: "ACTIVE" | "DRAFT" | "ARCHIVED") => {
-                                        if (v !== status) setStatus(v);
-                                    }}>
+                                    <Select
+                                        value={formData.status}
+                                        onValueChange={React.useCallback((v: "ACTIVE" | "DRAFT" | "ARCHIVED") => {
+                                            setFormData(prev => (prev.status !== v ? { ...prev, status: v } : prev));
+                                        }, [])}
+                                    >
                                         <SelectTrigger className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase text-[10px] tracking-widest">
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
@@ -636,7 +714,8 @@ export default function AdminNewProductPage() {
                                     <Label htmlFor="tags" className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 ml-1">Metadata Tags</Label>
                                     <Input
                                         id="tags"
-                                        name="tags"
+                                        value={formData.tags}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value.toUpperCase() }))}
                                         placeholder="MINIMAL, PREMIUM, LUXURY"
                                         className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 font-black uppercase placeholder:text-gray-200 transition-all text-[10px] tracking-widest"
                                     />

@@ -30,7 +30,7 @@ export default function FloatingSettings() {
       <button
         aria-label="Open settings"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-12 h-12 rounded-full bg-neon-green text-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+        className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
       >
         <Settings className="w-5 h-5" />
       </button>

@@ -32,7 +32,7 @@ export function PaymentSection() {
           onClick={() => setShowModal(!showModal)}
           className="w-full flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded text-sm font-medium transition-colors"
         >
-          <CreditCard className="w-4 h-4 text-neon-green" />
+          <CreditCard className="w-4 h-4 text-white" />
           Manage Payment Methods
         </button>
 
@@ -52,7 +52,7 @@ export function PaymentSection() {
                     <div>
                       <div className="text-sm font-medium">{card.brand}</div>
                       <div className="text-xs text-muted-foreground">**** **** **** {card.last4}</div>
-                      {card.isDefault && <div className="text-xs text-neon-green font-medium mt-1">Default</div>}
+                      {card.isDefault && <div className="text-xs text-white font-medium mt-1">Default</div>}
                     </div>
                     <button
                       onClick={() => removeCard(card.id)}
@@ -66,7 +66,7 @@ export function PaymentSection() {
 
               <button
                 onClick={addCard}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-neon-green text-black font-medium rounded hover:bg-neon-green/90 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white text-black font-medium rounded hover:bg-gray-100 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Add New Card
@@ -79,7 +79,7 @@ export function PaymentSection() {
       {/* Two-Factor Authentication */}
       <div className="flex items-center justify-between py-2">
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-neon-green" />
+          <Shield className="w-4 h-4 text-white" />
           <label className="text-sm font-medium">Two-Factor Authentication</label>
         </div>
         <SettingsToggle
@@ -90,7 +90,7 @@ export function PaymentSection() {
       {twoFactorEnabled ? (
         <div className="pl-6 space-y-2">
           <p className="text-xs text-muted-foreground">2FA is active via SMS/Email</p>
-          <button className="text-xs text-neon-green hover:underline font-medium">
+          <button className="text-xs text-white hover:underline font-medium">
             Setup 2FA
           </button>
         </div>

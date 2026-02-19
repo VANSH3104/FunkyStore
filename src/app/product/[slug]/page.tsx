@@ -162,6 +162,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                 fill
                                 className="object-contain"
                                 priority
+                                quality={100}
                             />
 
                             {/* Technical Overlays for brand vibe */}
@@ -211,6 +212,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             alt={`${product.name} thumbnail ${idx + 1}`}
                                             fill
                                             className="object-cover"
+                                            quality={60}
                                         />
                                         {activeImageIndex === idx && (
                                             <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
@@ -479,28 +481,34 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <span className="text-[11px] font-black uppercase tracking-[0.3em] text-black">Product Information</span>
                                         </AccordionTrigger>
                                         <AccordionContent className="pb-8">
-                                            <div className="space-y-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
-                                                <div className="flex justify-between border-b border-gray-50 pb-2">
-                                                    <span>Composition</span>
-                                                    <span className="text-black">100% Cotton / Heavyweight</span>
+                                            {product.productInfo ? (
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed whitespace-pre-wrap">
+                                                    {product.productInfo}
                                                 </div>
-                                                <div className="flex justify-between border-b border-gray-50 pb-2">
-                                                    <span>Color</span>
-                                                    <span className="text-black">{product.name.split(' ')[0]} / Acid Tint</span>
+                                            ) : (
+                                                <div className="space-y-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest leading-loose">
+                                                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                                                        <span>Composition</span>
+                                                        <span className="text-black">100% Cotton / Heavyweight</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                                                        <span>Color</span>
+                                                        <span className="text-black">{product.name.split(' ')[0]} / Acid Tint</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                                                        <span>Wash Care</span>
+                                                        <span className="text-black">Machine Wash Cold / Gentle</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                                                        <span>Country of Origin</span>
+                                                        <span className="text-black">India / FS-Tech Hub</span>
+                                                    </div>
+                                                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                                                        <span>Processing Time</span>
+                                                        <span className="text-black">Ships within 24-48 Hours</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex justify-between border-b border-gray-50 pb-2">
-                                                    <span>Wash Care</span>
-                                                    <span className="text-black">Machine Wash Cold / Gentle</span>
-                                                </div>
-                                                <div className="flex justify-between border-b border-gray-50 pb-2">
-                                                    <span>Country of Origin</span>
-                                                    <span className="text-black">India / FS-Tech Hub</span>
-                                                </div>
-                                                <div className="flex justify-between border-b border-gray-50 pb-2">
-                                                    <span>Processing Time</span>
-                                                    <span className="text-black">Ships within 24-48 Hours</span>
-                                                </div>
-                                            </div>
+                                            )}
                                         </AccordionContent>
                                     </AccordionItem>
 
@@ -509,8 +517,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <span className="text-[11px] font-black uppercase tracking-[0.3em] text-black">Shipping & Returns</span>
                                         </AccordionTrigger>
                                         <AccordionContent className="pb-8">
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed">
-                                                Standard shipping delivery within 5-7 business days. 7-day hassle-free returns. Items must be in original condition with tags intact.
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed whitespace-pre-wrap">
+                                                {product.shippingReturns || "Standard shipping delivery within 5-7 business days. 7-day hassle-free returns. Items must be in original condition with tags intact."}
                                             </p>
                                         </AccordionContent>
                                     </AccordionItem>
@@ -520,18 +528,25 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                                             <span className="text-[11px] font-black uppercase tracking-[0.3em] text-black">Additional Information</span>
                                         </AccordionTrigger>
                                         <AccordionContent className="pb-8">
-                                            <ul className="space-y-3">
-                                                <li className="flex items-start gap-3">
-                                                    <div className="w-1.5 h-1.5 bg-black rounded-full mt-1" />
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Colors may slightly vary depending on screen brightness.</p>
-                                                </li>
-                                                <li className="flex items-start gap-3">
-                                                    <div className="w-1.5 h-1.5 bg-black rounded-full mt-1" />
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Aesthetic features intentional slight distressing.</p>
-                                                </li>
-                                            </ul>
+                                            {product.additionalInfo ? (
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-relaxed whitespace-pre-wrap">
+                                                    {product.additionalInfo}
+                                                </div>
+                                            ) : (
+                                                <ul className="space-y-3">
+                                                    <li className="flex items-start gap-3">
+                                                        <div className="w-1.5 h-1.5 bg-black rounded-full mt-1" />
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Colors may slightly vary depending on screen brightness.</p>
+                                                    </li>
+                                                    <li className="flex items-start gap-3">
+                                                        <div className="w-1.5 h-1.5 bg-black rounded-full mt-1" />
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Aesthetic features intentional slight distressing.</p>
+                                                    </li>
+                                                </ul>
+                                            )}
                                         </AccordionContent>
                                     </AccordionItem>
+
                                 </Accordion>
                             </div>
 
@@ -669,6 +684,7 @@ function LookbookHeroImage({ src, name, index, isZoomed }: { src: string, name: 
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     priority
+                    quality={100}
                 />
             </div>
 

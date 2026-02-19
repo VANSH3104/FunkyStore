@@ -222,14 +222,17 @@ export const adminRouter = createTRPCRouter({
             quantity: z.number().int().min(0),
             sku: z.string(),
             categoryIds: z.array(z.string()).optional(),
-            imageUrls: z.array(z.string().url()).optional(),
+            imageUrls: z.array(z.string()).optional(),
             status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).default("DRAFT"),
             tags: z.string().optional(),
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
+            productInfo: z.string().optional(),
+            shippingReturns: z.string().optional(),
+            additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription } = input
+            const { name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, shippingReturns, additionalInfo } = input
             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
 
             const product = await ctx.db.product.create({
@@ -244,6 +247,9 @@ export const adminRouter = createTRPCRouter({
                     status,
                     metaTitle,
                     metaDescription,
+                    productInfo,
+                    shippingReturns,
+                    additionalInfo,
                     images: {
                         create: imageUrls?.map((url, index) => ({
                             url,
@@ -274,14 +280,17 @@ export const adminRouter = createTRPCRouter({
             quantity: z.number().int().min(0).optional(),
             sku: z.string().optional(),
             categoryIds: z.array(z.string()).optional(),
-            imageUrls: z.array(z.string().url()).optional(),
+            imageUrls: z.array(z.string()).optional(),
             status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
             tags: z.string().optional(),
             metaTitle: z.string().optional(),
             metaDescription: z.string().optional(),
+            productInfo: z.string().optional(),
+            shippingReturns: z.string().optional(),
+            additionalInfo: z.string().optional(),
         }))
         .mutation(async ({ ctx, input }) => {
-            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription } = input
+            const { id, name, description, price, compareAtPrice, quantity, sku, categoryIds, imageUrls, status, tags, metaTitle, metaDescription, productInfo, shippingReturns, additionalInfo } = input
 
             const updateData: any = {
                 name,
@@ -293,6 +302,9 @@ export const adminRouter = createTRPCRouter({
                 status,
                 metaTitle,
                 metaDescription,
+                productInfo,
+                shippingReturns,
+                additionalInfo,
             }
 
             if (name) {

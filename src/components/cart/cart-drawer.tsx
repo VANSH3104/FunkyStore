@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useCart } from "@/store/use-cart"
 import { Button } from "@/components/ui/button"
@@ -10,15 +11,22 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export function CartDrawer() {
     const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems } = useCart()
+    const [mounted, setMounted] = React.useState(false)
+
+    React.useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const totalItems = mounted ? getTotalItems() : 0
 
     return (
         <Sheet>
             <SheetTrigger asChild>
                 <button className="relative p-2 hover:bg-white/10 transition-colors">
                     <ShoppingBag className="w-6 h-6" />
-                    {getTotalItems() > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-neon-green text-black text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-none border-2 border-black -rotate-12">
-                            {getTotalItems()}
+                    {totalItems > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-none border border-white">
+                            {totalItems}
                         </span>
                     )}
                 </button>
@@ -26,7 +34,7 @@ export function CartDrawer() {
             <SheetContent className="w-full sm:max-w-md bg-deep-black border-l-2 border-charcoal text-white p-0 flex flex-col">
                 <SheetHeader className="p-6 border-b-2 border-charcoal">
                     <SheetTitle className="text-2xl font-black uppercase tracking-tighter italic">
-                        YOUR <span className="text-neon-green">BAG</span>
+                        YOUR <span className="text-gray-400">BAG</span>
                     </SheetTitle>
                 </SheetHeader>
 
@@ -37,7 +45,7 @@ export function CartDrawer() {
                                 <ShoppingBag className="w-12 h-12 text-muted-foreground opacity-20" />
                             </div>
                             <p className="text-muted-foreground font-black uppercase tracking-widest text-xs">Your bag is empty</p>
-                            <Button variant="outline" className="rounded-none border-2 border-white uppercase font-black hover:bg-neon-green hover:text-black">
+                            <Button variant="outline" className="rounded-none border border-white uppercase font-black hover:bg-white hover:text-black">
                                 Shop Arrivals
                             </Button>
                         </div>
@@ -58,12 +66,12 @@ export function CartDrawer() {
                                         </div>
                                         <div className="flex-grow space-y-2">
                                             <div className="flex justify-between items-start">
-                                                <h4 className="font-black uppercase tracking-tight text-sm group-hover:text-neon-green transition-colors">
+                                                <h4 className="font-black uppercase tracking-tight text-sm group-hover:text-gray-400 transition-colors">
                                                     {item.name}
                                                 </h4>
                                                 <button
                                                     onClick={() => removeItem(item.id, item.variantId)}
-                                                    className="text-muted-foreground hover:text-electric-pink transition-colors"
+                                                    className="text-muted-foreground hover:text-white transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -79,14 +87,14 @@ export function CartDrawer() {
                                                 <div className="flex items-center border border-charcoal">
                                                     <button
                                                         onClick={() => updateQuantity(item.id, item.quantity - 1, item.variantId)}
-                                                        className="p-2 hover:text-neon-green"
+                                                        className="p-2 hover:text-white"
                                                     >
                                                         <Minus className="w-3 h-3" />
                                                     </button>
                                                     <span className="w-8 text-center text-xs font-black">{item.quantity}</span>
                                                     <button
                                                         onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
-                                                        className="p-2 hover:text-neon-green"
+                                                        className="p-2 hover:text-white"
                                                     >
                                                         <Plus className="w-3 h-3" />
                                                     </button>
@@ -112,7 +120,7 @@ export function CartDrawer() {
                         </p>
                         <div className="grid grid-cols-1 gap-4 pt-4">
                             <Link href="/checkout" className="w-full">
-                                <Button className="h-16 w-full bg-neon-green text-black font-black uppercase tracking-widest rounded-none text-lg hover:shadow-[0_0_20px_rgba(0,255,65,0.4)] transition-all">
+                                <Button className="h-16 w-full bg-white text-black font-black uppercase tracking-widest rounded-none text-md hover:bg-gray-100 transition-all">
                                     Secure Checkout
                                 </Button>
                             </Link>

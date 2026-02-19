@@ -83,7 +83,7 @@ export default function CheckoutPage() {
     if (items.length === 0) {
         return (
             <div className="container mx-auto px-4 py-24 text-center">
-                <h1 className="text-4xl font-black uppercase italic mb-8">BAG IS <span className="text-neon-green">EMPTY</span></h1>
+                <h1 className="text-4xl font-black uppercase italic mb-8">YOUR BAG IS <span className="text-gray-400">EMPTY</span></h1>
                 <Link href="/products">
                     <Button className="bg-white text-black font-black uppercase tracking-widest rounded-none px-12 h-16 shadow-[8px_8px_0px_#000]">
                         Return to Store
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
                     email: data.email,
                 },
                 theme: {
-                    color: "#00FF41",
+                    color: "#000000",
                 },
             }
 
@@ -187,87 +187,87 @@ export default function CheckoutPage() {
                     <div className="flex-grow space-y-12">
                         {/* Progress */}
                         <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest">
-                            <span className={cn(step >= 1 ? "text-neon-green" : "text-muted-foreground")}>01. Information</span>
+                            <span className={cn(step >= 1 ? "text-white" : "text-muted-foreground")}>01. Information</span>
                             <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                            <span className={cn(step >= 2 ? "text-neon-green" : "text-muted-foreground")}>02. Shipping</span>
+                            <span className={cn(step >= 2 ? "text-white" : "text-muted-foreground")}>02. Shipping</span>
                             <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                            <span className={cn(step >= 3 ? "text-neon-green" : "text-muted-foreground")}>03. Payment</span>
+                            <span className={cn(step >= 3 ? "text-white" : "text-muted-foreground")}>03. Payment</span>
                         </div>
 
                         {step === 1 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-bold uppercase tracking-tight">CONTACT <span className="text-neon-green">INFO</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">CONTACT <span className="text-gray-400">INFO</span></h2>
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest">Email Address</Label>
                                         <Input
                                             id="email"
                                             type="email"
-                                            placeholder="cyberpunk@neon.city"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.email ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            placeholder="customer@example.com"
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.email ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("email")}
                                         />
-                                        {errors.email && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.email.message}</p>}
+                                        {errors.email && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.email.message}</p>}
                                     </div>
                                 </div>
 
-                                <h2 className="text-3xl font-bold uppercase tracking-tight pt-8">SHIPPING <span className="text-neon-green">ADDRESS</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight pt-8">SHIPPING <span className="text-gray-400">ADDRESS</span></h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName" className="text-[10px] uppercase font-black tracking-widest">First Name</Label>
                                         <Input
                                             id="firstName"
-                                            placeholder="V"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.firstName ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            placeholder="First Name"
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.firstName ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("firstName")}
                                         />
-                                        {errors.firstName && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.firstName.message}</p>}
+                                        {errors.firstName && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.firstName.message}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="lastName" className="text-[10px] uppercase font-black tracking-widest">Last Name</Label>
                                         <Input
                                             id="lastName"
-                                            placeholder="Silverhand"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.lastName ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            placeholder="Last Name"
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.lastName ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("lastName")}
                                         />
-                                        {errors.lastName && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.lastName.message}</p>}
+                                        {errors.lastName && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.lastName.message}</p>}
                                     </div>
                                     <div className="md:col-span-2 space-y-2">
                                         <Label htmlFor="address" className="text-[10px] uppercase font-black tracking-widest">Address</Label>
                                         <Input
                                             id="address"
-                                            placeholder="Night City, District 4"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.address ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            placeholder="123 Street Ave"
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.address ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("address")}
                                         />
-                                        {errors.address && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.address.message}</p>}
+                                        {errors.address && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.address.message}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="city" className="text-[10px] uppercase font-black tracking-widest">City</Label>
                                         <Input
                                             id="city"
                                             placeholder="Night City"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.city ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.city ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("city")}
                                         />
-                                        {errors.city && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.city.message}</p>}
+                                        {errors.city && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.city.message}</p>}
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="postalCode" className="text-[10px] uppercase font-black tracking-widest">Postal Code</Label>
                                         <Input
                                             id="postalCode"
-                                            placeholder="207700"
-                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.postalCode ? "border-electric-pink" : "border-charcoal focus:border-neon-green")}
+                                            placeholder="12345"
+                                            className={cn("bg-charcoal border-2 rounded-none h-12 text-white", errors.postalCode ? "border-red-900" : "border-charcoal focus:border-white")}
                                             {...register("postalCode")}
                                         />
-                                        {errors.postalCode && <p className="text-[10px] text-electric-pink font-bold uppercase">{errors.postalCode.message}</p>}
+                                        {errors.postalCode && <p className="text-[10px] text-red-500 font-bold uppercase">{errors.postalCode.message}</p>}
                                     </div>
                                 </div>
 
                                 <Button
                                     onClick={nextStep}
-                                    className="w-full h-16 bg-neon-green text-black font-black uppercase tracking-widest rounded-none text-lg hover:shadow-[0_0_20px_rgba(0,255,65,0.4)]"
+                                    className="w-full h-16 bg-white text-black font-black uppercase tracking-widest rounded-none text-lg hover:bg-gray-100 transition-all"
                                 >
                                     Continue to Shipping
                                 </Button>
@@ -276,14 +276,14 @@ export default function CheckoutPage() {
 
                         {step === 2 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-bold uppercase tracking-tight">SHIPPING <span className="text-neon-green">METHOD</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">SHIPPING <span className="text-gray-400">METHOD</span></h2>
                                 <div className="space-y-4">
                                     <div
-                                        className={cn("p-6 border-2 flex justify-between items-center cursor-pointer transition-all", shippingMethod === "standard" ? "border-neon-green bg-charcoal" : "border-charcoal bg-deep-black")}
+                                        className={cn("p-6 border-2 flex justify-between items-center cursor-pointer transition-all", shippingMethod === "standard" ? "border-white bg-charcoal" : "border-charcoal bg-deep-black")}
                                         onClick={() => setShippingMethod("standard")}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <Truck className={cn("w-6 h-6", shippingMethod === "standard" ? "text-neon-green" : "text-white")} />
+                                            <Truck className={cn("w-6 h-6", shippingMethod === "standard" ? "text-white" : "text-white/40")} />
                                             <div>
                                                 <p className="font-bold uppercase text-xs">Standard Shipping</p>
                                                 <p className="text-[10px] text-muted-foreground uppercase font-medium">3-5 Business Days</p>
@@ -292,11 +292,11 @@ export default function CheckoutPage() {
                                         <span className="font-black">FREE</span>
                                     </div>
                                     <div
-                                        className={cn("p-6 border-2 flex justify-between items-center cursor-pointer transition-all", shippingMethod === "express" ? "border-neon-green bg-charcoal" : "border-charcoal bg-deep-black")}
+                                        className={cn("p-6 border-2 flex justify-between items-center cursor-pointer transition-all", shippingMethod === "express" ? "border-white bg-charcoal" : "border-charcoal bg-deep-black")}
                                         onClick={() => setShippingMethod("express")}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <Truck className={cn("w-6 h-6", shippingMethod === "express" ? "text-neon-green" : "text-white")} />
+                                            <Truck className={cn("w-6 h-6", shippingMethod === "express" ? "text-white" : "text-white/40")} />
                                             <div>
                                                 <p className="font-bold uppercase text-xs">Express Shipping</p>
                                                 <p className="text-[10px] text-muted-foreground uppercase font-medium">24-48 Hours</p>
@@ -309,7 +309,7 @@ export default function CheckoutPage() {
                                     <Button variant="outline" onClick={() => setStep(1)} className="h-16 flex-1 rounded-none border-2 border-white uppercase font-black italic">Back</Button>
                                     <Button
                                         onClick={nextStep}
-                                        className="h-16 flex-[2] bg-neon-green text-black font-black uppercase tracking-widest rounded-none text-lg"
+                                        className="h-16 flex-[2] bg-white text-black font-black uppercase tracking-widest rounded-none text-lg hover:bg-gray-100 transition-all"
                                     >
                                         Continue to Payment
                                     </Button>
@@ -319,9 +319,9 @@ export default function CheckoutPage() {
 
                         {step === 3 && (
                             <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <h2 className="text-3xl font-bold uppercase tracking-tight">SECURE <span className="text-neon-green">PAYMENT</span></h2>
+                                <h2 className="text-3xl font-bold uppercase tracking-tight">SECURE <span className="text-gray-400">PAYMENT</span></h2>
                                 <div className="p-8 border-2 border-charcoal bg-charcoal/30 text-center space-y-6">
-                                    <div className="relative w-16 h-16 mx-auto bg-neon-green flex items-center justify-center -rotate-12">
+                                    <div className="relative w-16 h-16 mx-auto bg-white flex items-center justify-center -rotate-12">
                                         <Lock className="w-8 h-8 text-black rotate-12" />
                                     </div>
                                     <p className="text-sm text-muted-foreground max-w-xs mx-auto">
@@ -332,7 +332,7 @@ export default function CheckoutPage() {
                                     <Button variant="outline" onClick={() => setStep(2)} className="h-16 flex-1 rounded-none border-2 border-white uppercase font-black italic">Back</Button>
                                     <Button
                                         onClick={handleSubmit(handlePayment)}
-                                        className="h-16 flex-[2] bg-white text-black font-black uppercase tracking-widest rounded-none text-lg shadow-[8px_8px_0px_#00FF41]"
+                                        className="h-16 flex-[2] bg-white text-black font-black uppercase tracking-widest rounded-none text-lg shadow-[8px_8px_0px_rgba(255,255,255,0.1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
                                     >
                                         Pay Now ${total.toFixed(2)}
                                     </Button>
@@ -380,35 +380,35 @@ export default function CheckoutPage() {
                                     <span>${subtotal.toFixed(2)}</span>
                                 </div>
                                 {discount > 0 && (
-                                    <div className="flex justify-between text-[10px] font-black uppercase text-neon-green">
+                                    <div className="flex justify-between text-[10px] font-black uppercase text-gray-400">
                                         <span>Discount ({appliedCoupon?.code})</span>
                                         <span>-${discount.toFixed(2)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-[10px] font-black uppercase">
                                     <span>Shipping</span>
-                                    <span className={cn(shippingMethod === "express" ? "text-white" : "text-neon-green")}>
+                                    <span className={cn(shippingMethod === "express" ? "text-white" : "text-gray-400")}>
                                         {shippingMethod === "express" ? "$25.00" : "FREE"}
                                     </span>
                                 </div>
                                 <Separator className="bg-deep-black h-0.5" />
                                 <div className="flex justify-between text-2xl font-black">
                                     <span className="italic">TOTAL</span>
-                                    <span className="text-neon-green">${total.toFixed(2)}</span>
+                                    <span className="text-white">${total.toFixed(2)}</span>
                                 </div>
                             </div>
 
                             <div className="pt-4">
                                 {appliedCoupon ? (
-                                    <div className="flex items-center justify-between bg-neon-green/10 border-2 border-neon-green p-4 mb-4 animate-in fade-in slide-in-from-top-2">
+                                    <div className="flex items-center justify-between bg-white/5 border border-white/20 p-4 mb-4 animate-in fade-in slide-in-from-top-2">
                                         <div className="flex items-center gap-2">
-                                            <Tag className="w-4 h-4 text-neon-green" />
-                                            <span className="text-[10px] font-black uppercase text-neon-green">{appliedCoupon.code} APPLIED</span>
+                                            <Tag className="w-4 h-4 text-white" />
+                                            <span className="text-[10px] font-black uppercase text-white">{appliedCoupon.code} APPLIED</span>
                                         </div>
                                         <Button
                                             variant="ghost"
                                             onClick={() => setAppliedCoupon(null)}
-                                            className="h-fit p-0 text-neon-green hover:text-white"
+                                            className="h-fit p-0 text-white hover:text-gray-400"
                                         >
                                             <span className="text-[8px] font-black uppercase">REMOVE</span>
                                         </Button>
@@ -420,7 +420,7 @@ export default function CheckoutPage() {
                                                 placeholder="COUPON CODE"
                                                 value={couponCode}
                                                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                                                className="bg-deep-black border-none rounded-none focus-visible:ring-neon-green h-12 uppercase font-black text-xs"
+                                                className="bg-deep-black border-none rounded-none focus-visible:ring-white h-12 uppercase font-black text-xs"
                                             />
                                             <Button
                                                 onClick={handleApplyCoupon}
@@ -429,7 +429,7 @@ export default function CheckoutPage() {
                                                 Apply
                                             </Button>
                                         </div>
-                                        {couponError && <p className="text-[8px] text-electric-pink font-black uppercase">{couponError}</p>}
+                                        {couponError && <p className="text-[8px] text-red-500 font-black uppercase">{couponError}</p>}
                                     </div>
                                 )}
                                 <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase">

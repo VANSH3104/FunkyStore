@@ -9,30 +9,30 @@ import { cn } from "@/lib/utils"
 const slides = [
     {
         id: 1,
-        title: "NEURAL CORE",
-        tag: "COLLECTION 01",
+        title: "CORE ESSENTIALS",
+        tag: "EDIT 01",
         image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000",
-        description: "The synthesis of biological intent and mechanical precision. Optimized for high-density data environments.",
-        color: "text-neon-green",
-        bg: "bg-neon-green"
+        description: "The synthesis of functional design and premium materials. Optimized for daily urban navigation.",
+        color: "text-white",
+        bg: "bg-white"
     },
     {
         id: 2,
-        title: "STEALTH VOID",
-        tag: "COLLECTION 02",
+        title: "UTILITY SERIES",
+        tag: "EDIT 02",
         image: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?q=80&w=2000",
-        description: "Adaptive camouflage for the deep-grid operative. Silhouette disruption technology integrated as standard.",
-        color: "text-cyber-blue",
-        bg: "bg-cyber-blue"
+        description: "Adaptive technical wear for the modern professional. Performance integration as standard.",
+        color: "text-gray-400",
+        bg: "bg-gray-400"
     },
     {
         id: 3,
-        title: "URBAN RADIANCE",
-        tag: "COLLECTION 03",
+        title: "URBAN ESSENTIALS",
+        tag: "EDIT 03",
         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2000",
-        description: "Dominance in the high-frequency retail sectors. Visual saturation and aggressive aesthetic signatures.",
-        color: "text-electric-pink",
-        bg: "bg-electric-pink"
+        description: "Sophisticated essentials for the high-end streetwear landscape. Clean silhouettes and refined signatures.",
+        color: "text-gray-300",
+        bg: "bg-gray-300"
     }
 ]
 
@@ -59,7 +59,7 @@ export default function LookbookPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-neon-green selection:text-black">
+        <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
             {/* Immersive Background */}
             <div className="fixed inset-0 z-0">
                 {slides.map((slide, index) => (
@@ -86,17 +86,18 @@ export default function LookbookPage() {
                 {/* Header */}
                 <div className="flex justify-between items-start">
                     <div className="space-y-4">
-                        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-neon-green">Protocol V1.0 - Lookbook</p>
-                        <h1 className="text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-none group">
-                            CYBER <span className="text-neon-green">ZEN</span><br />
-                            ARCHIVE
-                        </h1>
+                        <div className="space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400">Premium Edition - Lookbook</p>
+                            <h1 className="text-6xl md:text-9xl font-black uppercase italic tracking-tighter leading-none group">
+                                LUXECHO <span className="text-gray-400">ARCHIVE</span>
+                            </h1>
+                        </div>
                     </div>
                     <div className="hidden md:flex gap-4">
-                        <Button variant="outline" size="icon" className="rounded-none border-white/20 bg-black/50 hover:bg-neon-green hover:text-black">
+                        <Button variant="outline" size="icon" className="rounded-none border-white/20 bg-black/50 hover:bg-white hover:text-black transition-colors">
                             <Share2 className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="icon" className="rounded-none border-white/20 bg-black/50 hover:bg-neon-green hover:text-black">
+                        <Button variant="outline" size="icon" className="rounded-none border-white/20 bg-black/50 hover:bg-white hover:text-black transition-colors">
                             <Expand className="w-4 h-4" />
                         </Button>
                     </div>
@@ -124,22 +125,22 @@ export default function LookbookPage() {
                             <p className="text-sm md:text-xl font-bold uppercase tracking-widest leading-relaxed text-white/60 italic">
                                 "{slides[currentSlide].description}"
                             </p>
-                            <Button className="h-16 px-12 bg-white text-black font-black uppercase tracking-widest rounded-none shadow-[8px_8px_0px_#00FF41] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-                                Acquire Data
+                            <Button className="h-16 px-12 bg-white text-black font-black uppercase tracking-widest rounded-none hover:bg-gray-100 transition-all">
+                                Shop Collection
                             </Button>
                         </div>
 
                         {/* Slide Selector */}
                         <div className="flex gap-4 p-4 bg-black/50 backdrop-blur-xl border-2 border-white/10">
-                            <Button onClick={prev} variant="ghost" className="h-12 w-12 p-0 text-white hover:text-neon-green rounded-none">
+                            <Button onClick={prev} variant="ghost" className="h-12 w-12 p-0 text-white hover:text-gray-400 rounded-none">
                                 <ArrowLeft className="w-6 h-6" />
                             </Button>
                             <div className="flex items-center gap-4 px-8 border-x-2 border-white/10 font-black italic">
-                                <span className="text-neon-green">0{currentSlide + 1}</span>
+                                <span className="text-white">0{currentSlide + 1}</span>
                                 <span className="text-white/20">/</span>
-                                <span className="text-white">0{slides.length}</span>
+                                <span className="text-white/40">0{slides.length}</span>
                             </div>
-                            <Button onClick={next} variant="ghost" className="h-12 w-12 p-0 text-white hover:text-neon-green rounded-none">
+                            <Button onClick={next} variant="ghost" className="h-12 w-12 p-0 text-white hover:text-gray-400 rounded-none">
                                 <ArrowRight className="w-6 h-6" />
                             </Button>
                         </div>
@@ -149,7 +150,7 @@ export default function LookbookPage() {
                 {/* Vertical Text */}
                 <div className="absolute right-12 top-1/2 -rotate-90 origin-right hidden lg:block">
                     <p className="text-[10px] font-black uppercase tracking-[1em] text-white/20 whitespace-nowrap">
-                        NEURAL INTERFACE OPTIMIZED // ZENZ SYSTEMS 2077
+                        DESIGNED FOR URBAN NAVIGATION // LUXECHO STUDIO 2026
                     </p>
                 </div>
             </div>
@@ -163,7 +164,7 @@ export default function LookbookPage() {
                     >
                         <div
                             className={cn(
-                                "h-full bg-neon-green transition-all duration-300",
+                                "h-full bg-white transition-all duration-300",
                                 index === currentSlide ? "w-full" : "w-0"
                             )}
                         />
