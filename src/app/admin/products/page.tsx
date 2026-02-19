@@ -17,7 +17,9 @@ import {
     Users,
     Eye,
     FolderPlus,
-    Tag as TagIcon
+    Tag as TagIcon,
+    AlertCircle,
+    CheckCircle2 as CheckIcon
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -32,11 +34,54 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function AdminProductsPage() {
     const { toast } = useToast()
     const utils = api.useUtils()
-    const { data: products, isLoading } = api.admin.getProducts.useQuery({})
+    const [searchQuery, setSearchQuery] = React.useState("")
+    const [debouncedSearch, setDebouncedSearch] = React.useState("")
+    const [statusFilter, setStatusFilter] = React.useState<"ACTIVE" | "DRAFT" | "ARCHIVED" | undefined>(undefined)
+    const [categoryFilter, setCategoryFilter] = React.useState<string | undefined>(undefined)
+    const [minPrice, setMinPrice] = React.useState<number | undefined>(undefined)
+    const [maxPrice, setMaxPrice] = React.useState<number | undefined>(undefined)
+    const [lowStockOnly, setLowStockOnly] = React.useState(false)
+    const [isFilterOpen, setIsFilterOpen] = React.useState(false)
+
+    // Handle debouncing search input
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
+
+    const { data: categories } = api.admin.getCategories.useQuery()
+    const { data: products, isLoading } = api.admin.getProducts.useQuery({
+        search: debouncedSearch,
+        status: statusFilter,
+        categoryId: categoryFilter,
+        minPrice,
+        maxPrice,
+        lowStock: lowStockOnly
+    })
+
+    const resetFilters = () => {
+        setStatusFilter(undefined)
+        setCategoryFilter(undefined)
+        setMinPrice(undefined)
+        setMaxPrice(undefined)
+        setLowStockOnly(false)
+        setSearchQuery("")
+    }
 
     const deleteProduct = api.admin.deleteProduct.useMutation({
         onSuccess: () => {
@@ -102,13 +147,134 @@ export default function AdminProductsPage() {
                     <div className="relative flex-grow">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                         <Input
-                            placeholder="SEARCH BY DESIGNATION..."
+                            placeholder="SEARCH BY DESIGNATION, SKU, TAGS..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="bg-gray-50 border-none focus-visible:ring-1 focus-visible:ring-black rounded-none h-16 pl-14 text-[10px] font-black uppercase tracking-widest"
                         />
                     </div>
-                    <Button variant="outline" className="border border-gray-100 rounded-none h-16 px-10 gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">
-                        <Filter className="w-4 h-4" /> Filter Stream
-                    </Button>
+                    <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                        <SheetTrigger asChild>
+                            <Button variant="outline" className="border border-gray-100 rounded-none h-16 px-10 gap-3 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-white transition-all">
+                                <Filter className="w-4 h-4" /> Filter Stream
+                                {(statusFilter || categoryFilter || minPrice || maxPrice || lowStockOnly) && (
+                                    <span className="w-2 h-2 bg-black rounded-full" />
+                                )}
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-[400px] sm:w-[450px] border-l border-gray-100 p-0 flex flex-col">
+                            <SheetHeader className="p-10 border-b border-gray-50 flex flex-row items-center justify-between">
+                                <div className="space-y-1">
+                                    <SheetTitle className="text-2xl font-black uppercase tracking-tighter">Filter Stream</SheetTitle>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Refining Data Manifest</p>
+                                </div>
+                                <Button variant="ghost" onClick={resetFilters} className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black">Reset All</Button>
+                            </SheetHeader>
+
+                            <div className="flex-grow overflow-y-auto p-10 space-y-12">
+                                {/* Lifecycle Status */}
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic">Lifecycle Status</Label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {(["ACTIVE", "DRAFT", "ARCHIVED"] as const).map((s) => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setStatusFilter(statusFilter === s ? undefined : s)}
+                                                className={cn(
+                                                    "w-full h-14 px-6 flex items-center justify-between border transition-all text-[10px] font-black uppercase tracking-widest",
+                                                    statusFilter === s ? "border-black bg-black text-white" : "border-gray-50 bg-gray-50 text-gray-400"
+                                                )}
+                                            >
+                                                {s}
+                                                {statusFilter === s && <CheckIcon className="w-4 h-4" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Class Allocation */}
+                                <div className="space-y-4">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic">Class Allocation</Label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {categories?.map((cat: any) => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setCategoryFilter(categoryFilter === cat.id ? undefined : cat.id)}
+                                                className={cn(
+                                                    "w-full h-14 px-6 flex items-center justify-between border transition-all text-[10px] font-black uppercase tracking-widest text-left",
+                                                    categoryFilter === cat.id ? "border-black bg-black text-white" : "border-gray-50 bg-gray-50 text-gray-400"
+                                                )}
+                                            >
+                                                {cat.name}
+                                                {categoryFilter === cat.id && <CheckIcon className="w-4 h-4" />}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Valuation Range */}
+                                <div className="space-y-6">
+                                    <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 italic">Valuation Range</Label>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <p className="text-[8px] font-black uppercase text-gray-300">Minimum</p>
+                                            <Input
+                                                type="number"
+                                                placeholder="0"
+                                                value={minPrice ?? ""}
+                                                onChange={(e) => setMinPrice(e.target.value ? Number(e.target.value) : undefined)}
+                                                className="bg-gray-50 border-none rounded-none h-12 text-[10px] font-black"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-[8px] font-black uppercase text-gray-300">Maximum</p>
+                                            <Input
+                                                type="number"
+                                                placeholder="MAX"
+                                                value={maxPrice ?? ""}
+                                                onChange={(e) => setMaxPrice(e.target.value ? Number(e.target.value) : undefined)}
+                                                className="bg-gray-50 border-none rounded-none h-12 text-[10px] font-black"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Stock Alert State */}
+                                <div className="pt-6 border-t border-gray-50">
+                                    <button
+                                        onClick={() => setLowStockOnly(!lowStockOnly)}
+                                        className={cn(
+                                            "w-full h-16 px-6 flex items-center justify-between border transition-all",
+                                            lowStockOnly ? "border-red-500 bg-red-50 text-red-600" : "border-gray-50 bg-gray-50 text-gray-400"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <AlertCircle className="w-5 h-5" />
+                                            <div className="text-left">
+                                                <p className="text-[10px] font-black uppercase tracking-widest">Reserve Depletion</p>
+                                                <p className="text-[8px] font-medium uppercase tracking-widest mt-0.5 opacity-60">Low Stock Alert (≤ 5 units)</p>
+                                            </div>
+                                        </div>
+                                        <div className={cn(
+                                            "w-5 h-5 border flex items-center justify-center transition-all",
+                                            lowStockOnly ? "bg-red-500 border-red-500" : "border-gray-200"
+                                        )}>
+                                            {lowStockOnly && <CheckIcon className="w-3 h-3 text-white" />}
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="p-10 border-t border-gray-50 bg-gray-50/50">
+                                <Button
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="w-full bg-black text-white font-black uppercase h-16 rounded-none text-[11px] tracking-[0.3em] shadow-xl active:scale-95 transition-all"
+                                >
+                                    Review {products?.length || 0} Filtered Entries
+                                </Button>
+                            </div>
+                        </SheetContent>
+                    </Sheet>
                 </div>
 
                 <div className="border border-gray-50">

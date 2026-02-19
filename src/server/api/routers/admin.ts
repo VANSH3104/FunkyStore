@@ -46,11 +46,72 @@ export const adminRouter = createTRPCRouter({
         .input(z.object({
             skip: z.number().default(0),
             take: z.number().default(50),
+            search: z.string().optional(),
+            categoryId: z.string().optional(),
+            minPrice: z.number().optional(),
+            maxPrice: z.number().optional(),
+            status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).optional(),
+            lowStock: z.boolean().optional(),
         }))
         .query(async ({ ctx, input }) => {
+            const { search, skip, take, categoryId, minPrice, maxPrice, status, lowStock } = input
+
+            const where: any = {}
+
+            // Search Logic
+            if (search) {
+                where.OR = [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { sku: { contains: search, mode: 'insensitive' } },
+                    { description: { contains: search, mode: 'insensitive' } },
+                    { metaTitle: { contains: search, mode: 'insensitive' } },
+                    { metaDescription: { contains: search, mode: 'insensitive' } },
+                    { productInfo: { contains: search, mode: 'insensitive' } },
+                    {
+                        tags: {
+                            some: {
+                                name: { contains: search, mode: 'insensitive' }
+                            }
+                        }
+                    },
+                    {
+                        categories: {
+                            some: {
+                                name: { contains: search, mode: 'insensitive' }
+                            }
+                        }
+                    }
+                ]
+            }
+
+            // Category Filter
+            if (categoryId) {
+                where.categories = {
+                    some: { id: categoryId }
+                }
+            }
+
+            // Price Range Filter
+            if (minPrice !== undefined || maxPrice !== undefined) {
+                where.price = {}
+                if (minPrice !== undefined) where.price.gte = minPrice
+                if (maxPrice !== undefined) where.price.lte = maxPrice
+            }
+
+            // Status Filter
+            if (status) {
+                where.status = status
+            }
+
+            // Low Stock Filter
+            if (lowStock) {
+                where.quantity = { lte: 5 } // Using the default low stock alert threshold
+            }
+
             return ctx.db.product.findMany({
-                skip: input.skip,
-                take: input.take,
+                where,
+                skip,
+                take,
                 orderBy: { createdAt: "desc" },
                 include: {
                     categories: true,
@@ -373,6 +434,12 @@ export const adminRouter = createTRPCRouter({
                 where: { id: input.id }
             })
         }),
+
+    getCategories: adminProcedure.query(async ({ ctx }) => {
+        return ctx.db.category.findMany({
+            orderBy: { name: "asc" }
+        })
+    }),
 
     // Attribute Management for Advanced Filters
     getAttributes: adminProcedure.query(async ({ ctx }) => {

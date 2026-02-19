@@ -1,4 +1,4 @@
-    import { z } from "zod"
+import { z } from "zod"
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc"
 import { ProductStatus } from "@prisma/client"
 
@@ -114,6 +114,24 @@ export const productRouter = createTRPCRouter({
                 where.OR = [
                     { name: { contains: search, mode: "insensitive" } },
                     { description: { contains: search, mode: "insensitive" } },
+                    { sku: { contains: search, mode: "insensitive" } },
+                    { metaTitle: { contains: search, mode: "insensitive" } },
+                    { metaDescription: { contains: search, mode: "insensitive" } },
+                    { productInfo: { contains: search, mode: "insensitive" } },
+                    {
+                        tags: {
+                            some: {
+                                name: { contains: search, mode: "insensitive" }
+                            }
+                        }
+                    },
+                    {
+                        categories: {
+                            some: {
+                                name: { contains: search, mode: "insensitive" }
+                            }
+                        }
+                    }
                 ]
             }
 

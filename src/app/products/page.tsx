@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { api } from "@/trpc/react"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
@@ -33,13 +34,24 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 
 export default function ProductsPage() {
-    const [search, setSearch] = React.useState("")
+    const searchParams = useSearchParams()
+    const initialSearch = searchParams.get("search") || ""
+
+    const [search, setSearch] = React.useState(initialSearch)
     const [categoryId, setCategoryId] = React.useState<string | undefined>(undefined)
     const [minPrice, setMinPrice] = React.useState<number | undefined>(undefined)
     const [maxPrice, setMaxPrice] = React.useState<number | undefined>(undefined)
     const [selectedOptions, setSelectedOptions] = React.useState<Record<string, string[]>>({})
     const [sort, setSort] = React.useState<"newest" | "price_asc" | "price_desc">("newest")
-    const [isFilterOpen, setIsFilterOpen] = React.useState(false) // Hidden by default as per user request
+    const [isFilterOpen, setIsFilterOpen] = React.useState(false)
+
+    // Sync search state with URL param updates
+    React.useEffect(() => {
+        const querySearch = searchParams.get("search")
+        if (querySearch !== null && querySearch !== search) {
+            setSearch(querySearch)
+        }
+    }, [searchParams])
 
     // Fetch data
     const { data: categories } = api.product.getCategories.useQuery()
@@ -110,10 +122,13 @@ export default function ProductsPage() {
                     {/* Horizontal Category Track - Fully Responsive & Touch Friendly */}
                     <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide flex-grow justify-start md:justify-center py-2 px-2">
                         <button
-                            onClick={() => setCategoryId(undefined)}
+                            onClick={() => {
+                                setCategoryId(undefined)
+                                setSearch("")
+                            }}
                             className={cn(
                                 "text-[9px] md:text-[11px] font-black uppercase tracking-widest px-4 md:px-7 py-2 md:py-2.5 transition-all border shrink-0",
-                                categoryId === undefined ? "bg-black text-white border-black" : "bg-transparent text-neutral-600 border-gray-100 hover:border-black hover:text-black"
+                                categoryId === undefined && !search ? "bg-black text-white border-black" : "bg-transparent text-neutral-600 border-gray-100 hover:border-black hover:text-black"
                             )}
                         >
                             All
@@ -121,7 +136,10 @@ export default function ProductsPage() {
                         {categories?.map((cat) => (
                             <button
                                 key={cat.id}
-                                onClick={() => setCategoryId(cat.id)}
+                                onClick={() => {
+                                    setCategoryId(cat.id)
+                                    setSearch("")
+                                }}
                                 className={cn(
                                     "text-[9px] md:text-[11px] font-black uppercase tracking-widest px-4 md:px-7 py-2 md:py-2.5 transition-all border shrink-0",
                                     categoryId === cat.id ? "bg-black text-white border-black" : "bg-transparent text-neutral-600 border-gray-100 hover:border-black hover:text-black"
@@ -170,7 +188,7 @@ export default function ProductsPage() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsFilterOpen(false)}
-                            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] lg:hidden"
+                            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md lg:hidden"
                         />
                     )}
                 </AnimatePresence>
@@ -323,6 +341,7 @@ export default function ProductsPage() {
 
                 {/* Products Grid - Responsive Spacing & Columns */}
                 <main className="flex-grow p-4 md:p-8 lg:p-12 overflow-hidden bg-gray-50/30">
+
                     <div className="mb-8 flex items-center justify-between lg:hidden">
                         <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-gray-400">
                             Showing <span className="text-black">{data?.items.length ?? 0}</span> Results

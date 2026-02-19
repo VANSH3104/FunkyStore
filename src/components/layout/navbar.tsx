@@ -90,6 +90,14 @@ export function Navbar() {
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-1 md:gap-4">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsSearchOpen(true)}
+                        className="hover:bg-transparent"
+                    >
+                        <Search className="w-5 h-5" strokeWidth={1.5} />
+                    </Button>
                     <Link href="/account" className="hidden md:block">
                         <Button variant="ghost" size="icon" className="hover:bg-transparent">
                             <User className="w-5 h-5" strokeWidth={1.5} />
@@ -105,6 +113,11 @@ export function Navbar() {
                     </Link>
                     <CartDrawer />
                 </div>
+
+                <SearchOverlay
+                    isOpen={isSearchOpen}
+                    onClose={() => setIsSearchOpen(false)}
+                />
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetContent side="left" className="bg-white border-r border-gray-100 p-0 w-[300px]">
                         <SheetHeader className="sr-only">
