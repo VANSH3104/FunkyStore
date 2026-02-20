@@ -107,6 +107,10 @@ const config = {
 				'var(--font-poppins)',
 				'Inter',
 				'sans-serif'
+			],
+			barlow: [
+				'var(--font-barlow)',
+				'sans-serif'
 			]
 		},
 		transitionTimingFunction: {

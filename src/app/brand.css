@@ -1,0 +1,43 @@
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wave-section::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 60px;
+    right: 60px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 12rem;
+    color: rgba(255, 255, 255, 0.03);
+    line-height: 1;
+    z-index: 1;
+}
+
+/* Custom Cursor styles if needed */
+.cursor-expanded {
+    transform: scale(4);
+    background: white;
+    mix-blend-mode: difference;
+}

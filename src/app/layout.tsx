@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TRPCReactProvider } from "@/trpc/react";
@@ -9,6 +9,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins"
+});
+
+const barlow = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+  variable: "--font-barlow"
 });
 
 import { Playfair_Display } from "next/font/google";
@@ -29,6 +35,8 @@ import { AuthProvider } from "@/components/auth-provider";
 import { LoadingScreen } from "@/components/layout/loading-screen";
 import FloatingSettings from "@/components/ui/floating-settings";
 import { SettingsProvider } from "@/contexts/settings-context";
+import { NavSpacer } from "@/components/layout/nav-spacer"
+import { AnnouncementBar } from "@/components/home/announcement-bar"
 
 export default function RootLayout({
   children,
@@ -37,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", poppins.variable, playfair.variable)}>
+      <body className={cn("min-h-screen bg-background font-sans antialiased flex flex-col", poppins.variable, playfair.variable, barlow.variable)}>
         <TRPCReactProvider>
           <ThemeProvider
             attribute="class"
@@ -47,8 +55,10 @@ export default function RootLayout({
             forcedTheme="light"
           >
             <AuthProvider>
+              <AnnouncementBar />
               <Navbar />
-              <main className="grow pt-20">
+              <main className="grow">
+                <NavSpacer />
                 {children}
               </main>
               <Footer />

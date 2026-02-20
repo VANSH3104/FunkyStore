@@ -586,4 +586,86 @@ export const adminRouter = createTRPCRouter({
                 where: { id: input.id }
             })
         }),
+
+    // ── Hero Slideshow ────────────────────────────────────────────────
+    getHeroSlides: adminProcedure.query(async ({ ctx }) => {
+        return ctx.db.heroSlide.findMany({ orderBy: { order: "asc" } })
+    }),
+
+    createHeroSlide: adminProcedure
+        .input(z.object({
+            title: z.string().min(1),
+            subtitle: z.string().min(1),
+            ctaText: z.string().default("Explore Drop"),
+            ctaLink: z.string().default("/products"),
+            image: z.string().min(1),
+            order: z.number().default(0),
+            isActive: z.boolean().default(true),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.heroSlide.create({ data: input })
+        }),
+
+    updateHeroSlide: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            title: z.string().min(1).optional(),
+            subtitle: z.string().min(1).optional(),
+            ctaText: z.string().optional(),
+            ctaLink: z.string().optional(),
+            image: z.string().optional(),
+            order: z.number().optional(),
+            isActive: z.boolean().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, ...data } = input
+            return ctx.db.heroSlide.update({ where: { id }, data })
+        }),
+
+    deleteHeroSlide: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.heroSlide.delete({ where: { id: input.id } })
+        }),
+
+    // ── Announcement Bar ──────────────────────────────────────────────
+    getAnnouncements: adminProcedure.query(async ({ ctx }) => {
+        return ctx.db.announcement.findMany({ orderBy: { createdAt: "desc" } })
+    }),
+
+    createAnnouncement: adminProcedure
+        .input(z.object({
+            text: z.string().min(1),
+            link: z.string().optional(),
+            isActive: z.boolean().default(true),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            // Deactivate others when creating an active one
+            if (input.isActive) {
+                await ctx.db.announcement.updateMany({ data: { isActive: false } })
+            }
+            return ctx.db.announcement.create({ data: input })
+        }),
+
+    updateAnnouncement: adminProcedure
+        .input(z.object({
+            id: z.string(),
+            text: z.string().min(1).optional(),
+            link: z.string().optional(),
+            isActive: z.boolean().optional(),
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id, ...data } = input
+            // If activating this, deactivate others
+            if (data.isActive) {
+                await ctx.db.announcement.updateMany({ where: { id: { not: id } }, data: { isActive: false } })
+            }
+            return ctx.db.announcement.update({ where: { id }, data })
+        }),
+
+    deleteAnnouncement: adminProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            return ctx.db.announcement.delete({ where: { id: input.id } })
+        }),
 })

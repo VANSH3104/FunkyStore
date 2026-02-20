@@ -11,6 +11,7 @@ import {
     FolderPlus,
     Tag as TagIcon,
     FileText,
+    Layers,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -21,6 +22,7 @@ export function AdminSidebar() {
 
     const navItems = [
         { name: "Dashboard Overview", icon: LayoutDashboard, href: "/admin" },
+        { name: "Homepage CMS", icon: Layers, href: "/admin/hero-slides" },
         { name: "Product Catalog", icon: Package, href: "/admin/products" },
         { name: "Category Matrix", icon: FolderPlus, href: "/admin/categories" },
         { name: "Filter Attributes", icon: TagIcon, href: "/admin/attributes" },

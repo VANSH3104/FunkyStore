@@ -7,21 +7,21 @@ import Image from "next/image"
 
 const collections = [
     {
-        title: "Street Culture",
-        slug: "street-culture",
-        image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920&auto=format&fit=crop",
+        title: "Varsity Collective",
+        slug: "varsity-collective",
+        image: "/assets/images/brand/mens_emerald_varsity_poolside_1771586994342.png",
         badge: "01",
     },
     {
-        title: "Modern Minimal",
-        slug: "modern-minimal",
-        image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop",
+        title: "Urban Luxe",
+        slug: "urban-luxe",
+        image: "/assets/images/brand/womens_navy_varsity_rooftop_1771587018168.png",
         badge: "02",
     },
     {
-        title: "Urban Essentials",
-        slug: "urban-essentials",
-        image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=1920&auto=format&fit=crop",
+        title: "Utility Essentials",
+        slug: "utility-essentials",
+        image: "/assets/images/brand/mens_beige_utility_urban_1771587038435.png",
         badge: "03",
     },
 ]
@@ -82,7 +82,7 @@ export function FeaturedCollections() {
                                 </h3>
                                 <Link href={`/collections/${collection.slug}`}>
                                     <Button className="w-full bg-white text-black font-black uppercase tracking-[0.2em] rounded-none text-[10px] h-14 hover:bg-black hover:text-white transition-colors">
-                                        Explre Collection
+                                        Explore Collection
                                     </Button>
                                 </Link>
                             </div>

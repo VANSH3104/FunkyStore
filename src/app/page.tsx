@@ -1,53 +1,476 @@
-import { Hero } from "@/components/home/hero"
-import { FeaturedCollections } from "@/components/home/featured-collections"
+"use client"
+
 import { FeaturedProducts } from "@/components/home/featured-products"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { motion } from "framer-motion"
+import { HeroSlideshow } from "@/components/home/hero-slideshow"
+import { motion, useScroll, useTransform } from "framer-motion"
+import NextImage from "next/image"
+import { useRef, useEffect, useState } from "react"
+import Link from "next/link"
+import "./brand.css"
+import { FeaturedCollections } from "@/components/home/featured-collections"
 
-export default function Home() {
+/* ─── Data ─────────────────────────────────────────────────────────── */
+const WAVES = [
+  {
+    id: "wave-01",
+    num: "01",
+    label: "Collective — 001 / VARSITY",
+    title: "VARSITY",
+    sub: "POOLSIDE",
+    accent: "DROP.",
+    image: "/assets/images/brand/mens_emerald_varsity_poolside_1771586994342.png",
+    align: "left" as const,
+    desc: "Emerald canvas meets structured silhouette — worn by those who lead, never follow."
+  },
+  {
+    id: "wave-02",
+    num: "02",
+    label: "Collection — 002 / URBAN",
+    title: "URBAN",
+    sub: "LUXURY",
+    accent: "EVOLVED.",
+    image: "/assets/images/brand/womens_navy_varsity_rooftop_1771587018168.png",
+    align: "right" as const,
+    desc: "Navy precision. Rooftop aesthetic. Where architecture meets apparel."
+  },
+  {
+    id: "wave-03",
+    num: "03",
+    label: "Collection — 003 / UTILITY",
+    title: "UTILITY",
+    sub: "AESTHETIC",
+    accent: "CORE.",
+    image: "/assets/images/brand/mens_beige_utility_urban_1771587038435.png",
+    align: "left" as const,
+    desc: "Beige raw — the architecture of the streets translated into fabric and form."
+  }
+]
+
+/* ─── Gender Split: Bonkerscorner-style 50/50 ───────────────────────── */
+function GenderSplit() {
+  const categories = [
+    {
+      label: "MEN",
+      sub: "New Season.",
+      href: "/products?gender=men",
+      image: "/assets/images/brand/mens_category_editorial.png",
+      align: "left" as const,
+    },
+    {
+      label: "WOMEN",
+      sub: "New Season.",
+      href: "/products?gender=women",
+      image: "/assets/images/brand/womens_category_editorial.png",
+      align: "right" as const,
+    },
+  ]
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Hero />
-      <FeaturedCollections />
-      <FeaturedProducts />
+    <section className="w-full flex flex-col md:flex-row h-[90vh] bg-black overflow-hidden">
+      {categories.map((cat) => (
+        <Link
+          key={cat.label}
+          href={cat.href}
+          className="relative flex-1 group overflow-hidden cursor-none"
+        >
+          {/* Image */}
+          <NextImage
+            src={cat.image}
+            alt={cat.label}
+            fill
+            className="object-cover object-top transition-transform duration-[2s] ease-out group-hover:scale-[1.04]"
+            sizes="50vw"
+            unoptimized
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-700" />
+          {/* Bottom gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-      {/* Newsletter Section: Unified Funky Identity */}
-      <section className="py-32 bg-gray-50 border-y border-gray-100 mt-20">
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-            <div className="lg:w-1/2">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-2 h-2 bg-black animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Join the movement</span>
-              </div>
-              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-8">
-                UNMASK THE <br /> FUTURE
-              </h2>
-              <p className="text-gray-400 text-lg font-bold uppercase tracking-widest leading-relaxed max-w-md">
-                Signup to get exclusive early access to limited edition drops.
-              </p>
-            </div>
-            <div className="lg:w-1/2 w-full">
-              <form className="flex flex-col gap-6">
-                <div className="relative">
-                  <Input
-                    placeholder="ENTER YOUR EMAIL"
-                    className="h-20 bg-white border-2 border-gray-100 rounded-none text-black font-bold placeholder:text-gray-300 text-lg px-8 focus-visible:ring-black focus-visible:border-black transition-all"
-                  />
-                  <div className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 bg-black" />
-                </div>
-                <Button className="h-20 px-12 bg-black text-white font-black uppercase tracking-[0.3em] rounded-none text-sm hover:bg-black transition-colors duration-500">
-                  Join Community
-                </Button>
-              </form>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-8 text-center lg:text-left">
-                *By joining, you agree to our premium terms and conditions. No spam, just pure heat.
-              </p>
-            </div>
-          </div>
+          {/* Divider line between panels (right panel only) */}
+          {cat.align === "right" && (
+            <div className="absolute left-0 top-0 bottom-0 w-px bg-white/10 z-10" />
+          )}
+
+          {/* Text */}
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 p-10 lg:p-16 z-20"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+          >
+            <span className="block text-white/40 text-[9px] font-black uppercase tracking-[0.5em] mb-3">SS 2026 Collection</span>
+            <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-[-0.02em]">
+              <span className="block text-white text-[12vw] md:text-[7vw] lg:text-[6rem] xl:text-[7rem]">{cat.label}</span>
+              <span className="block text-white/20 text-[8vw] md:text-[4vw] lg:text-[3.5rem] xl:text-[4rem] italic">{cat.sub}</span>
+            </h2>
+            <span className="inline-flex items-center gap-3 mt-6 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 group-hover:text-white transition-colors duration-500">
+              Shop Now
+              <span className="w-6 h-px bg-white/40 group-hover:w-10 group-hover:bg-white transition-all duration-500" />
+            </span>
+          </motion.div>
+        </Link>
+      ))}
+    </section>
+  )
+}
+
+/* ─── Collection Banner: compact 3-tile row ─────────────────────────── */
+function CollectionBanner() {
+  const tiles = [
+    {
+      num: "001",
+      name: "VARSITY",
+      tag: "Poolside Edition",
+      image: "/assets/images/brand/mens_emerald_varsity_poolside_1771586994342.png",
+      href: "/products",
+    },
+    {
+      num: "002",
+      name: "URBAN",
+      tag: "Rooftop Series",
+      image: "/assets/images/brand/womens_navy_varsity_rooftop_1771587018168.png",
+      href: "/products",
+    },
+    {
+      num: "003",
+      name: "UTILITY",
+      tag: "Street Aesthetic",
+      image: "/assets/images/brand/mens_beige_utility_urban_1771587038435.png",
+      href: "/products",
+    },
+  ]
+
+  return (
+    <section className="w-full bg-[#0a0a0a] py-4 border-t border-white/5">
+      {/* Section header */}
+      <div className="flex items-center justify-between px-8 lg:px-16 py-8">
+        <div className="flex items-center gap-4">
+          <div className="w-8 h-px bg-rose-600" />
+          <span className="text-[9px] font-black uppercase tracking-[0.6em] text-white/40">Collections — 001</span>
         </div>
-      </section>
+        <Link
+          href="/products"
+          className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40 hover:text-white transition-colors flex items-center gap-3 group"
+        >
+          View All
+          <span className="w-4 h-px bg-white/30 group-hover:w-8 group-hover:bg-white transition-all duration-500" />
+        </Link>
+      </div>
+
+      {/* Tiles */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5">
+        {tiles.map((tile, idx) => (
+          <motion.div
+            key={tile.num}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.12, duration: 0.8, ease: [0.19, 1, 0.22, 1] }}
+            className="group relative aspect-[4/3] overflow-hidden bg-[#0a0a0a]"
+          >
+            <NextImage
+              src={tile.image}
+              alt={tile.name}
+              fill
+              className="object-cover object-top transition-transform duration-[2s] ease-out group-hover:scale-[1.06]"
+              sizes="33vw"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-70" />
+
+            {/* Oversized watermark num */}
+            <div className="absolute top-6 right-6 text-[8rem] font-barlow font-black text-white/[0.05] leading-none pointer-events-none select-none">
+              {tile.num}
+            </div>
+
+            <div className="absolute bottom-0 left-0 p-8 z-10">
+              <span className="block text-rose-600 text-[8px] font-black uppercase tracking-[0.5em] mb-2">{tile.tag}</span>
+              <h3 className="font-barlow font-black uppercase text-white text-4xl lg:text-5xl leading-none tracking-tight">{tile.name}</h3>
+              <Link
+                href={tile.href}
+                className="inline-flex items-center gap-2 mt-4 text-[8px] font-black uppercase tracking-[0.4em] text-white/40 group-hover:text-white transition-colors duration-500"
+              >
+                Shop Drop <span className="w-4 h-px bg-current" />
+              </Link>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ─── Wave Section: 50/50 editorial split ───────────────────────────── */
+function WaveSection({ wave }: { wave: typeof WAVES[0] }) {
+  const ref = useRef(null)
+  const imgRef = useRef(null)
+  const { scrollYProgress } = useScroll({ target: imgRef, offset: ["start end", "end start"] })
+  const y = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"])
+  const isRight = wave.align === "right"
+
+  return (
+    <section
+      ref={ref}
+      className={`relative w-full h-screen flex bg-black overflow-hidden ${isRight ? "flex-row-reverse" : "flex-row"}`}
+    >
+      {/* ── Image Panel (60%) ── */}
+      <div ref={imgRef} className="relative w-[60%] h-full overflow-hidden flex-shrink-0">
+        <motion.div style={{ y }} className="absolute inset-0 scale-110">
+          <NextImage
+            src={wave.image}
+            alt={wave.title}
+            fill
+            className="object-cover object-center"
+            sizes="60vw"
+            priority={wave.id === "wave-01"}
+            unoptimized
+          />
+        </motion.div>
+        {/* Subtle inner shadow toward the text side */}
+        <div className={`absolute inset-0 ${isRight ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-transparent via-transparent to-black/70 pointer-events-none`} />
+        {/* Bottom fade */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
+
+        {/* Large watermark number over image */}
+        <div className="absolute bottom-8 right-8 text-[18vw] font-barlow font-black text-white/[0.06] leading-none pointer-events-none select-none">
+          {wave.num}
+        </div>
+      </div>
+
+      {/* ── Text Panel (40%) ── */}
+      <div className={`relative w-[40%] flex flex-col justify-center px-12 lg:px-20 z-10 bg-black ${isRight ? "items-end text-right" : "items-start text-left"}`}>
+        {/* Vertical rule line */}
+        <div className="absolute top-0 bottom-0 left-0 w-px bg-white/5" />
+
+        <motion.div
+          initial={{ opacity: 0, x: isRight ? 40 : -40 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-15%" }}
+          transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="space-y-8"
+        >
+          <span className="block text-rose-600 text-[9px] font-black uppercase tracking-[0.6em]">
+            {wave.label}
+          </span>
+
+          <div>
+            <h2 className="font-barlow font-black uppercase leading-[0.82] tracking-[-0.02em]">
+              <span className="block text-white text-6xl lg:text-8xl xl:text-[7rem]">{wave.title}</span>
+              <span className="block text-white/20 text-6xl lg:text-8xl xl:text-[7rem] italic">{wave.sub}</span>
+              <span className="block text-rose-600 text-6xl lg:text-8xl xl:text-[7rem]">{wave.accent}</span>
+            </h2>
+          </div>
+
+          <div className={`w-12 h-px bg-white/20 ${isRight ? "ml-auto" : ""}`} />
+
+          <p className={`text-white/50 text-xs font-semibold uppercase tracking-[0.15em] leading-relaxed max-w-xs ${isRight ? "ml-auto" : ""}`}>
+            {wave.desc}
+          </p>
+
+          <Link
+            href="/products"
+            className={`inline-flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.4em] text-white/60 hover:text-white transition-colors group ${isRight ? "ml-auto" : ""}`}
+          >
+            Shop Now
+            <span className="w-8 h-px bg-white/30 group-hover:w-12 group-hover:bg-white transition-all duration-500" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Marquee ──────────────────────────────────────────────────────── */
+function Marquee() {
+  const items = ["New Drop", "Varsity 001", "Urban Luxury", "Limited Edition", "Utility Core", "SS 2026", "Free Shipping"]
+  const repeated = [...items, ...items, ...items]
+  return (
+    <div className="bg-rose-600 py-3.5 overflow-hidden whitespace-nowrap relative z-30">
+      <motion.div
+        animate={{ x: ["0%", "-33.33%"] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+        className="flex gap-0 items-center"
+      >
+        {repeated.map((item, i) => (
+          <span key={i} className="text-[9px] font-black uppercase tracking-[0.5em] text-white px-8">
+            {item} <span className="opacity-50 pr-8">✦</span>
+          </span>
+        ))}
+      </motion.div>
     </div>
+  )
+}
+
+/* ─── Editorial Split ───────────────────────────────────────────────── */
+function EditorialSection() {
+  return (
+    <section className="w-full bg-[#0a0a0a] grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]">
+      {/* Left: Image */}
+      <div className="relative min-h-[50vh] lg:min-h-auto overflow-hidden group">
+        <NextImage
+          src="/assets/images/brand/womens_high_fashion_luxury_car_1771587292091.png"
+          alt="Editorial 2026"
+          fill
+          className="object-cover object-top transition-transform duration-[4s] ease-out group-hover:scale-[1.04]"
+          sizes="50vw"
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-black/20" />
+      </div>
+
+      {/* Right: Copy */}
+      <div className="flex flex-col justify-center px-12 lg:px-20 py-20 bg-white">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.19, 1, 0.22, 1] }}
+          className="space-y-8"
+        >
+          <span className="text-rose-600 text-[9px] font-black uppercase tracking-[0.6em]">Editorial — 2026 Vision</span>
+          <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-tighter text-black">
+            <span className="block text-7xl lg:text-9xl">SILHOU</span>
+            <span className="block text-7xl lg:text-9xl">ETTE</span>
+            <span className="block text-7xl lg:text-9xl text-rose-600 italic">2026</span>
+          </h2>
+          <div className="w-10 h-px bg-black/20" />
+          <p className="text-black/50 text-sm font-medium uppercase tracking-widest leading-relaxed max-w-sm">
+            We don&apos;t design clothes. We design the space between the body and everything that tries to define it.
+          </p>
+          <Link
+            href="/lookbook"
+            className="inline-flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.4em] text-black group"
+          >
+            View Lookbook
+            <span className="w-8 h-px bg-black group-hover:w-16 transition-all duration-500" />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Final CTA ─────────────────────────────────────────────────────── */
+function FinalCTA() {
+  const ref = useRef(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
+  const y = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"])
+
+  return (
+    <section ref={ref} className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      {/* Background image */}
+      <motion.div style={{ y }} className="absolute inset-0 scale-110">
+        <NextImage
+          src="/assets/images/brand/womens_premium_streetwear_sunset_1771587061342.png"
+          alt="Join the movement"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+      </motion.div>
+
+      {/* Content */}
+      <div className="relative z-10 text-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }}
+          className="space-y-10"
+        >
+          <span className="block text-white/30 text-[9px] font-black uppercase tracking-[1em]">
+            Join the Movement — Luxecho
+          </span>
+          <h2 className="font-barlow font-black uppercase leading-[0.85] tracking-tighter">
+            <span className="block text-white text-7xl md:text-[10rem] lg:text-[12rem]">UNMASK</span>
+            <span className="block text-7xl md:text-[10rem] lg:text-[12rem] text-transparent" style={{ WebkitTextStroke: "2px #e11d48" }}>THE FUTURE</span>
+          </h2>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+            <Link href="/products">
+              <button className="px-14 py-6 bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] hover:bg-rose-600 hover:text-white transition-all duration-300 shadow-2xl">
+                Shop the Drop
+              </button>
+            </Link>
+            <button className="px-14 py-6 bg-transparent border border-white/20 text-white font-black uppercase tracking-[0.4em] text-[10px] hover:border-rose-600 hover:text-rose-600 transition-all duration-300">
+              Join Community
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Page ──────────────────────────────────────────────────────────── */
+export default function Home() {
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 })
+  const [isHovering, setIsHovering] = useState(false)
+
+  useEffect(() => {
+    const move = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY })
+    window.addEventListener("mousemove", move)
+    return () => window.removeEventListener("mousemove", move)
+  }, [])
+
+  return (
+    <main className="bg-black min-h-screen cursor-none selection:bg-rose-600 selection:text-white overflow-x-hidden">
+      {/* Custom Cursor */}
+      <motion.div
+        className="fixed pointer-events-none z-[9999] rounded-full mix-blend-difference bg-white"
+        animate={{
+          x: mousePos.x - (isHovering ? 20 : 6),
+          y: mousePos.y - (isHovering ? 20 : 6),
+          width: isHovering ? 40 : 12,
+          height: isHovering ? 40 : 12,
+        }}
+        transition={{ type: "spring", damping: 25, stiffness: 250, mass: 0.4 }}
+      />
+
+      {/* Sections */}
+      <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+        <HeroSlideshow />
+      </div>
+
+      <Marquee />
+
+      <GenderSplit />
+
+      {WAVES.map((wave) => (
+        <div key={wave.id} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+          <WaveSection wave={wave} />
+        </div>
+      ))}
+
+      <CollectionBanner />
+
+      <EditorialSection />
+
+      {/* Products */}
+      <section className="bg-[#0a0a0a] py-32">
+        <div className="container mx-auto px-6 mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <span className="block text-rose-600 text-[9px] font-black uppercase tracking-[0.8em] mb-4">Latest Drops</span>
+            <h2 className="font-barlow font-black uppercase text-white text-7xl md:text-[10rem] tracking-tighter leading-[0.85]">
+              THE<br /><span className="text-white/10">WAVES</span>
+            </h2>
+          </motion.div>
+        </div>
+        <FeaturedProducts />
+      </section>
+
+      <div onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+        <FinalCTA />
+      </div>
+    </main>
   )
 }

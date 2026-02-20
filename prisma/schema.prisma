@@ -420,3 +420,29 @@ model BlogPost {
   @@index([status, publishedAt])
   @@map("blog_posts")
 }
+
+model HeroSlide {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String
+  ctaText   String   @default("Explore Drop")
+  ctaLink   String   @default("/products")
+  image     String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_slides")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  text      String
+  link      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("announcements")
+}

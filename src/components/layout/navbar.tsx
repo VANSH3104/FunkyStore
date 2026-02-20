@@ -24,12 +24,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { CartDrawer } from "@/components/cart/cart-drawer"
 import { SearchOverlay } from "@/components/layout/search-overlay"
 import { LuxechoLogo } from "@/components/layout/luxecho-logo"
+import { usePathname } from "next/navigation"
 
 const navItems = [
     { name: "Shop", href: "/products" },
-    { name: "Collections", href: "/collections" },
-    { name: "Lookbook", href: "/lookbook" },
-    { name: "About", href: "/about" },
 ]
 
 export function Navbar() {
@@ -41,10 +39,13 @@ export function Navbar() {
     const { data: wishlist } = api.account.getWishlist.useQuery(undefined, {
         enabled: !!session?.user,
     })
+    const { data: announcement } = api.cms.getActiveAnnouncement.useQuery()
+    const pathname = usePathname()
+    const isHomepage = pathname === "/"
 
     const wishlistCount = wishlist?.length || 0
-
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : ""
+    // Sit below the announcement bar when it's active (36px = h-9)
+    const topOffset = announcement ? 36 : 0
 
     React.useEffect(() => {
         setIsSearchOpen(false)
@@ -53,18 +54,25 @@ export function Navbar() {
 
     React.useEffect(() => {
         const handleScroll = () => {
-            setIsScrolled(window.scrollY > 20)
+            setIsScrolled(window.scrollY > 60)
         }
-        window.addEventListener("scroll", handleScroll)
+        window.addEventListener("scroll", handleScroll, { passive: true })
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
+
+    // Transparent + white text on the entire homepage; solid everywhere else
+    const isTransparent = isHomepage
 
     return (
         <>
             <header
+                style={{ top: topOffset }}
                 className={cn(
-                    "fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-brand-copper/10 bg-brand-cream/90 backdrop-blur-md",
-                    isScrolled ? "h-14 shadow-[0_2px_20px_-12px_rgba(194,126,105,0.15)]" : "h-20"
+                    "fixed left-0 right-0 z-50 transition-all duration-500",
+                    isScrolled ? "h-14 shadow-[0_2px_20px_-12px_rgba(194,126,105,0.15)]" : "h-20",
+                    isTransparent
+                        ? "bg-transparent"
+                        : "bg-brand-cream/95 backdrop-blur-md border-b border-brand-copper/10"
                 )}
             >
                 <nav className="container h-full mx-auto px-6 lg:px-12 flex items-center justify-between">
@@ -72,9 +80,9 @@ export function Navbar() {
                     <div className="hidden md:flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 -ml-2 hover:text-brand-copper transition-colors"
+                            className={cn("p-2 -ml-2 transition-colors", isTransparent ? "text-white hover:text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "hover:text-brand-copper")}
                         >
-                            <Menu className="w-6 h-6" strokeWidth={1} />
+                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2 : 1} />
                         </button>
                     </div>
 
@@ -82,40 +90,40 @@ export function Navbar() {
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 -ml-2 hover:text-brand-copper transition-colors"
+                            className={cn("p-2 -ml-2 transition-colors", isTransparent ? "text-white hover:text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "hover:text-brand-copper")}
                         >
-                            <Menu className="w-6 h-6" strokeWidth={1} />
+                            <Menu className={cn(isTransparent ? "w-8 h-8" : "w-7 h-7")} strokeWidth={isTransparent ? 2 : 1} />
                         </button>
                     </div>
 
                     {/* Centralized Logo */}
                     <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 group">
-                        <LuxechoLogo size={42} className="group-hover:scale-105 transition-transform duration-700" />
-                        <span className="text-xl font-serif text-brand-charcoal tracking-tight group-hover:tracking-wider transition-all duration-700">
+                        <LuxechoLogo size={48} className="group-hover:scale-105 transition-transform duration-700" />
+                        <span className={cn("text-2xl font-serif tracking-tight group-hover:tracking-wider transition-all duration-700 font-bold", isTransparent ? "text-white" : "text-brand-charcoal")}>
                             luxecho
                         </span>
                     </Link>
 
                     {/* Right Actions */}
-                    <div className="flex items-center gap-1 md:gap-4">
+                    <div className={cn("flex items-center gap-0 md:gap-2", isTransparent ? "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.6)]" : "text-brand-charcoal")}>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setIsSearchOpen(true)}
-                            className="hover:bg-transparent"
+                            className="hover:bg-white/10 w-10 h-10"
                         >
-                            <Search className="w-5 h-5" strokeWidth={1.5} />
+                            <Search className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
                         </Button>
                         <Link href="/account" className="hidden md:block">
-                            <Button variant="ghost" size="icon" className="hover:bg-transparent">
-                                <User className="w-5 h-5" strokeWidth={1.5} />
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 w-10 h-10">
+                                <User className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
                             </Button>
                         </Link>
                         <Link href="/account/wishlist" className="hidden md:block">
-                            <Button variant="ghost" size="icon" className="hover:bg-transparent relative">
-                                <Heart className="w-5 h-5" strokeWidth={1.5} />
+                            <Button variant="ghost" size="icon" className="hover:bg-white/10 w-10 h-10 relative">
+                                <Heart className={cn(isTransparent ? "w-7 h-7" : "w-6 h-6")} strokeWidth={isTransparent ? 2 : 1.2} />
                                 {wishlistCount > 0 && (
-                                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-black rounded-full" />
+                                    <span className={cn("absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full", isTransparent ? "bg-white" : "bg-black")} />
                                 )}
                             </Button>
                         </Link>
@@ -164,7 +172,7 @@ export function Navbar() {
                                         className="flex items-center justify-between text-xs font-bold uppercase tracking-widest"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <Heart className="w-4 h-4" /> Wishlist
+                                            <Heart className="w-6 h-" /> Wishlist
                                         </div>
                                         {wishlistCount > 0 && (
                                             <span className="bg-black text-white px-2 py-0.5 text-[10px] rounded-full">
